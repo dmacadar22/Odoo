@@ -1,0 +1,27 @@
+<odoo>
+    <data>
+        <record id="view_category_property_form_inherit" model="ir.ui.view">
+            <field name="name">product.category.property.form.change.account</field>
+            <field name="model">product.category</field>
+            <field name="inherit_id" ref="account.view_category_property_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='account_property']" position="after">
+                    <div class="float-left" name="button_box">
+                        <button name="apply_all_product"
+                              context="{'income': 1}"
+                              class="oe_link"
+                              type="object"
+                              string="Apply account income for all"
+                              icon="fa-check"/>
+                        <button name="apply_all_product"
+                              context="{'expense': 1}"
+                              class="oe_link"
+                              type="object"
+                              string="Apply account expense for all"
+                              icon="fa-check"/>
+                    </div>
+                </xpath>
+              </field>
+      </record>
+  </data>
+</odoo>
