@@ -1,0 +1,32 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* account_category_product_change
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 12.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-01-23 05:44+0000\n"
+"PO-Revision-Date: 2019-01-23 05:44+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: account_category_product_change
+#: model_terms:ir.ui.view,arch_db:account_category_product_change.view_category_property_form_inherit
+msgid "Apply account expense for all"
+msgstr "Aplicar cuenta de gastos a todos"
+
+#. module: account_category_product_change
+#: model_terms:ir.ui.view,arch_db:account_category_product_change.view_category_property_form_inherit
+msgid "Apply account income for all"
+msgstr "Aplicar cuenta de ingreso a todos"
+
+#. module: account_category_product_change
+#: model:ir.model,name:account_category_product_change.model_product_category
+msgid "Product Category"
+msgstr "Categoría de producto"
+
