@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="inherit_pos_config_view_form" model="ir.ui.view">
+        <field name="name">pos.config.form.view</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='category_reference']" position="after">
+                <div class="col-12 col-lg-6 o_setting_box" title="Product limit.">
+                    <div class="o_setting_right_pane">
+                        <label for="product_limit" string="Product limit"/>
+                        <div class="text-muted">
+                            Limit to list products in POS
+                        </div>
+                        <div class="content-group mt16">
+                            <field name="product_limit" required="1"/>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
