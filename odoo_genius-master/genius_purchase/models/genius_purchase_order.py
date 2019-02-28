@@ -54,12 +54,12 @@ class GeniusPurchaseOrder(models.Model):
         ondelete='cascade',
         string=_("Purchase Order Lines"))
 
-    @api.multi
-    def _track_subtype(self, init_values):
-        self.ensure_one()
-        if 'name' in init_values:
-            return 'mail.mt_comment'
-        return False
+    # @api.multi
+    # def _track_subtype(self, init_values):
+    #     self.ensure_one()
+    #     if 'name' in init_values:
+    #         return 'mail.mt_comment'
+    #     return False
 
     @api.multi
     def action_oc_draft(self):
@@ -75,6 +75,7 @@ class GeniusPurchaseOrder(models.Model):
                 order_lines = []
                 order_vals = {
                     'partner_id': supplier.id,
+                    # 'partner_ref': rec.supplierName,
                     'state': 'draft',
                     'date_order': rec.dateCreated,
                     'uniqueOrderID': rec.uniqueOrderID,
@@ -94,6 +95,10 @@ class GeniusPurchaseOrder(models.Model):
                             'product_qty': order_line.quantity
                         }
                         order_lines.append((0, 0, order_line_vals))
+
+                picking = self.env['stock.picking.type'].search([('barcode', '=', rec.storeID)], limit=1)
+                if picking.exists():
+                    order_vals['picking_type_id'] = picking.id
 
                 self.env['purchase.order'].create(order_vals)
                 rec.state = 'done'
@@ -116,6 +121,7 @@ class GeniusPurchaseOrder(models.Model):
             order_lines = []
             order_vals = {
                 'partner_id': supplier.id,
+                # 'partner_ref': vals.get('supplierName'),
                 'state': 'draft',
                 'date_order': vals.get('dateCreated', fields.Datetime.today),
                 'uniqueOrderID': vals.get('uniqueOrderID'),
@@ -143,6 +149,10 @@ class GeniusPurchaseOrder(models.Model):
                         line.get('quantity')
                     }
                     order_lines.append((0, 0, order_line_vals))
+            
+            picking = self.env['stock.picking.type'].search([('barcode', '=', vals.get('storeID'))], limit=1)
+            if picking.exists():
+                order_vals['picking_type_id'] = picking.id
 
             self.env['purchase.order'].create(order_vals)
             order_id.write({'state': 'done'})
@@ -168,7 +178,6 @@ class GeniusPurchaseOrder(models.Model):
         if req.status_code != 200 and connection.get_access_token():
             headers['Authorization'] = connection.access_token
             req = requests.get('{}'.format(base_url), headers=headers, timeout=5)
-        print(req.status_code)
         return req
 
     @api.model
@@ -177,7 +186,6 @@ class GeniusPurchaseOrder(models.Model):
             [('type', '=', 'pro')], limit=1)
 
         if not connection.exists():
-            # raise UserError(_("Ud. debe configurar la conexión a Swagger"))
             return
 
         uniqueOrder_List = [item.uniqueOrderID for item in self.search([])]
@@ -188,10 +196,7 @@ class GeniusPurchaseOrder(models.Model):
                 store_id=store.store_id,
                 endpoints='orders')
             
-            print(req.content)
-
             orders = json.loads(req.content.decode('utf-8'))
-
             # print(orders)
 
             if len(orders.get('orders')):
