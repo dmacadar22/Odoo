@@ -91,7 +91,7 @@ class GeniusPurchaseOrder(models.Model):
                             'name': product.name,
                             'product_uom': product.uom_id.id,
                             'date_planned': rec.dateCreated,
-                            'price_unit': order_line.cost,
+                            'price_unit': product.standard_price,
                             'product_qty': order_line.quantity
                         }
                         order_lines.append((0, 0, order_line_vals))
@@ -135,18 +135,12 @@ class GeniusPurchaseOrder(models.Model):
                     [('barcode', '=', line.get('gtin'))], limit=1)
                 if product.exists():
                     order_line_vals = {
-                        'product_id':
-                        product.id,
-                        'name':
-                        product.name,
-                        'product_uom':
-                        product.uom_id.id,
-                        'date_planned':
-                        vals.get('dateCreated', fields.Datetime.today),
-                        'price_unit':
-                        line.get('cost'),
-                        'product_qty':
-                        line.get('quantity')
+                        'product_id': product.id,
+                        'name': product.name,
+                        'product_uom': product.uom_id.id,
+                        'date_planned': vals.get('dateCreated', fields.Datetime.today),
+                        'price_unit': product.standard_price,
+                        'product_qty': line.get('quantity')
                     }
                     order_lines.append((0, 0, order_line_vals))
             
@@ -218,38 +212,27 @@ class GeniusPurchaseOrder(models.Model):
                             'orderID': order['header'].get('orderID'),
                             'storeID': order['header'].get('storeID'),
                             'storeName': order['header'].get('storeName'),
-                            'storePONumber':
-                            order['header'].get('storePONumber'),
+                            'storePONumber': order['header'].get('storePONumber'),
                             'supplierID': order['header'].get('supplierID'),
-                            'supplierName':
-                            order['header'].get('supplierName'),
+                            'supplierName': order['header'].get('supplierName'),
                             'dateCreated': order['header'].get('dateCreated'),
                             'orderTotal': order['header'].get('orderTotal'),
                             'orderSource': order['header'].get('orderSource'),
                             'orderStatus': order['header'].get('orderStatus'),
-                            'accountNumber':
-                            order['header'].get('accountNumber'),
+                            'accountNumber': order['header'].get('accountNumber'),
                             'message': order['header'].get('message'),
                             'order_line_ids': order_lines
                         }
 
                         for item in order.get('details'):
                             vals = {
-                                'supplierSKU':
-                                item.get('supplierSKU'),
-                                'itemDescription':
-                                item.get('itemDescription'),
-                                'cost':
-                                item.get('cost'),
-                                'quantity':
-                                item.get('quantity'),
-                                'uom':
-                                item.get('uom'),
-                                'amount':
-                                int(item.get('quantity')) * float(
-                                    item.get('cost')),
-                                'gtin':
-                                item.get('gtin')
+                                'supplierSKU': item.get('supplierSKU'),
+                                'itemDescription': item.get('itemDescription'),
+                                'cost': item.get('cost'),
+                                'quantity': item.get('quantity'),
+                                'uom': item.get('uom'),
+                                'amount': int(item.get('quantity')) * float(item.get('cost')),
+                                'gtin': item.get('gtin')
                             }
                             order_lines.append((0, 0, vals))
 
