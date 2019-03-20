@@ -4,14 +4,17 @@
 #    __manifest__.py file at the root folder of this module.                  #
 ###############################################################################
 
+import logging
 import requests, json
 from datetime import datetime, timedelta
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
+_logger = logging.getLogger(__name__)
+
 headers = {
     'accept': 'application/json',
-    'content-type': 'application/x-www-form-urlencoded',
+    'content-type': 'application/json',
     'charset': 'utf-8',
 }
 
@@ -27,7 +30,8 @@ class GeniusPurchaseOrder(models.Model):
     _inherit = ['mail.thread']
     _description = "Genius Orden de Compra"
 
-    name = fields.Char(string="Nombre", compute="_compute_get_name", track_visibility=True)
+    name = fields.Char(
+        string="Nombre", compute="_compute_get_name", track_visibility=True)
     uniqueOrderID = fields.Char(string=_("Uid"))
     orderID = fields.Integer(string=_("Order ID"))
     storeID = fields.Integer(string=_("Store ID"))
@@ -46,7 +50,6 @@ class GeniusPurchaseOrder(models.Model):
         selection=[('draft', 'Draft'), ('done', 'Done')],
         default='draft',
     )
-    
 
     order_line_ids = fields.One2many(
         comodel_name='genius.purchase.order.line',
@@ -54,22 +57,18 @@ class GeniusPurchaseOrder(models.Model):
         ondelete='cascade',
         string=_("Purchase Order Lines"))
 
-    # @api.multi
-    # def _track_subtype(self, init_values):
-    #     self.ensure_one()
-    #     if 'name' in init_values:
-    #         return 'mail.mt_comment'
-    #     return False
-
     @api.multi
     def action_oc_draft(self):
         for rec in self:
 
-            order = self.env['purchase.order'].search([('uniqueOrderID', '=', rec.uniqueOrderID)] )
+            order = self.env['purchase.order'].search([('uniqueOrderID', '=',
+                                                        rec.uniqueOrderID)])
             if order.exists():
-                return 
-            
-            supplier = self.env['res.partner'].search([('supplier', '=', True), ('name', '=', rec.supplierName)], limit=1)
+                return
+
+            supplier = self.env['res.partner'].search(
+                [('supplier', '=', True), ('name', '=', rec.supplierName)],
+                limit=1)
 
             if supplier.exists():
                 order_lines = []
@@ -84,7 +83,8 @@ class GeniusPurchaseOrder(models.Model):
 
                 product_obj = self.env['product.product']
                 for order_line in rec.order_line_ids:
-                    product = product_obj.search([('barcode', '=', order_line.gtin)], limit=1)
+                    product = product_obj.search(
+                        [('barcode', '=', order_line.gtin)], limit=1)
                     if product.exists():
                         order_line_vals = {
                             'product_id': product.id,
@@ -96,7 +96,8 @@ class GeniusPurchaseOrder(models.Model):
                         }
                         order_lines.append((0, 0, order_line_vals))
 
-                picking = self.env['stock.picking.type'].search([('barcode', '=', rec.storeID)], limit=1)
+                picking = self.env['stock.picking.type'].search(
+                    [('barcode', '=', rec.storeID)], limit=1)
                 if picking.exists():
                     order_vals['picking_type_id'] = picking.id
 
@@ -143,8 +144,9 @@ class GeniusPurchaseOrder(models.Model):
                         'product_qty': line.get('quantity')
                     }
                     order_lines.append((0, 0, order_line_vals))
-            
-            picking = self.env['stock.picking.type'].search([('barcode', '=', vals.get('storeID'))], limit=1)
+
+            picking = self.env['stock.picking.type'].search(
+                [('barcode', '=', vals.get('storeID'))], limit=1)
             if picking.exists():
                 order_vals['picking_type_id'] = picking.id
 
@@ -164,14 +166,18 @@ class GeniusPurchaseOrder(models.Model):
         req = None
         headers['Authorization'] = connection.access_token
         # payload = {'previouslyExportedOrders': False}
-        base_url = "{}/stores/{}/{}?previouslyExportedOrders=false".format(connection.base_url, store_id,
-                                            endpoints)
+        base_url = "{}/stores/{}/{}?previouslyExportedOrders=false".format(
+            connection.base_url, store_id, endpoints)
 
         req = requests.get('{}'.format(base_url), headers=headers, timeout=5)
 
         if req.status_code != 200 and connection.get_access_token():
             headers['Authorization'] = connection.access_token
-            req = requests.get('{}'.format(base_url), headers=headers, timeout=5)
+            req = requests.get(
+                '{}'.format(base_url), headers=headers, timeout=5)
+
+        _logger.info("Url {} - status {}".format(base_url, req.status_code))
+
         return req
 
     @api.model
@@ -189,22 +195,28 @@ class GeniusPurchaseOrder(models.Model):
                 connection=connection,
                 store_id=store.store_id,
                 endpoints='orders')
-            
+
+            patch_orders = {'orders': []}
             orders = json.loads(req.content.decode('utf-8'))
-            # print(orders)
+            _logger.info("The Store {} have {} Purchase Orders".format(store.store_id, len(orders.get('orders'))))
 
             if len(orders.get('orders')):
                 orders_list = [
                     orders for orders in orders.get('orders') if
                     not orders['header']['uniqueOrderID'] in uniqueOrder_List
                 ]
-                # if len(orders_list):
-                #     self.env.user.notify_info(
-                #         message="Se han añadido {} nuevas órdenes de compras".
-                #         format(len(orders_list)))
 
                 for order in orders_list:
                     uniqueOrderID = order['header'].get('uniqueOrderID')
+
+                    order_json = {
+                        "orderId": order['header'].get('orderID'),
+                        "uniqueOrderID": uniqueOrderID,
+                        "dateExported": order['header'].get('dateCreated')
+                    }
+
+                    patch_orders['orders'].append(order_json)
+
                     if not uniqueOrderID in uniqueOrder_List:
                         order_lines = []
                         order_vals = {
@@ -212,14 +224,17 @@ class GeniusPurchaseOrder(models.Model):
                             'orderID': order['header'].get('orderID'),
                             'storeID': order['header'].get('storeID'),
                             'storeName': order['header'].get('storeName'),
-                            'storePONumber': order['header'].get('storePONumber'),
+                            'storePONumber':
+                            order['header'].get('storePONumber'),
                             'supplierID': order['header'].get('supplierID'),
-                            'supplierName': order['header'].get('supplierName'),
+                            'supplierName':
+                            order['header'].get('supplierName'),
                             'dateCreated': order['header'].get('dateCreated'),
                             'orderTotal': order['header'].get('orderTotal'),
                             'orderSource': order['header'].get('orderSource'),
                             'orderStatus': order['header'].get('orderStatus'),
-                            'accountNumber': order['header'].get('accountNumber'),
+                            'accountNumber':
+                            order['header'].get('accountNumber'),
                             'message': order['header'].get('message'),
                             'order_line_ids': order_lines
                         }
@@ -231,21 +246,41 @@ class GeniusPurchaseOrder(models.Model):
                                 'cost': item.get('cost'),
                                 'quantity': item.get('quantity'),
                                 'uom': item.get('uom'),
-                                'amount': int(item.get('quantity')) * float(item.get('cost')),
+                                'amount': int(item.get('quantity')) * float(
+                                    item.get('cost')),
                                 'gtin': item.get('gtin')
                             }
                             order_lines.append((0, 0, vals))
 
                         self.create(order_vals)
 
+                if len(patch_orders['orders']):
+                    # https://posapi.dev.geniuscentral.com/stores/100331/orders
+                    headers['Authorization'] = connection.access_token
+                    base_url = "{}/stores/{}/orders".format(
+                        connection.base_url, store.store_id)
+
+                    req = requests.patch('{}'.format(base_url),
+                        headers=headers,
+                        data=json.dumps(patch_orders),
+                        timeout=5)
+
+                    if req.status_code != 200 and connection.get_access_token(
+                    ):
+                        headers['Authorization'] = connection.access_token
+                        req = requests.patch('{}'.format(base_url),
+                            headers=headers,
+                            data=patch_orders,
+                            timeout=5)
+
         # return orders
 
     def redirect_purchases_orders_view(self):
         # Get lead views
         # self.get_purchase_orders()
-        body ="Message has been approved on {}".format(datetime.now())
+        body = "Message has been approved on {}".format(datetime.now())
         self.message_post(body=body, subject="Subject", subtype="mt_note")
-        
+
         action = self.env.ref(
             'genius_purchase.action_genius_purchase_order').read()[0]
         return action
