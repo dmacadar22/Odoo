@@ -196,7 +196,7 @@ class GeniusPurchaseOrder(models.Model):
                 store_id=store.store_id,
                 endpoints='orders')
 
-            patch_orders = {'orders': []}
+            trash_orders = {'orders': []}
             orders = json.loads(req.content.decode('utf-8'))
             _logger.info("The Store {} have {} Purchase Orders".format(store.store_id, len(orders.get('orders'))))
 
@@ -206,16 +206,15 @@ class GeniusPurchaseOrder(models.Model):
                     not orders['header']['uniqueOrderID'] in uniqueOrder_List
                 ]
 
+                for order in orders.get('orders'):
+                    trash_orders['orders'].append({
+                        "orderId": order['header'].get('orderID'),
+                        "uniqueOrderID": order['header'].get('uniqueOrderID'),
+                        "dateExported": order['header'].get('dateCreated')
+                    })
+
                 for order in orders_list:
                     uniqueOrderID = order['header'].get('uniqueOrderID')
-
-                    order_json = {
-                        "orderId": order['header'].get('orderID'),
-                        "uniqueOrderID": uniqueOrderID,
-                        "dateExported": order['header'].get('dateCreated')
-                    }
-
-                    patch_orders['orders'].append(order_json)
 
                     if not uniqueOrderID in uniqueOrder_List:
                         order_lines = []
@@ -254,15 +253,16 @@ class GeniusPurchaseOrder(models.Model):
 
                         self.create(order_vals)
 
-                if len(patch_orders['orders']):
+                if len(trash_orders['orders']):
                     # https://posapi.dev.geniuscentral.com/stores/100331/orders
                     headers['Authorization'] = connection.access_token
                     base_url = "{}/stores/{}/orders".format(
                         connection.base_url, store.store_id)
 
-                    req = requests.patch('{}'.format(base_url),
+                    req = requests.patch(
+                        '{}'.format(base_url),
                         headers=headers,
-                        data=json.dumps(patch_orders),
+                        data=json.dumps(trash_orders),
                         timeout=5)
 
                     if req.status_code != 200 and connection.get_access_token(
@@ -270,8 +270,10 @@ class GeniusPurchaseOrder(models.Model):
                         headers['Authorization'] = connection.access_token
                         req = requests.patch('{}'.format(base_url),
                             headers=headers,
-                            data=patch_orders,
+                            data=trash_orders,
                             timeout=5)
+                    _logger.info("Trashing {} Purchase Orders".format(
+                        len(trash_orders['orders'])))
 
         # return orders
 
