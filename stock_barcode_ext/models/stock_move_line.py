@@ -1,0 +1,79 @@
+# -*- coding: utf-8 -*-
+
+from odoo import api, fields, models, _
+from odoo.addons import decimal_precision as dp
+from odoo.exceptions import UserError, ValidationError
+
+
+class StockMoveLineExt(models.Model):
+    _inherit = "stock.move.line"
+
+    description = fields.Text(
+        'Product Description',
+        translate=True,
+    )
+
+    lst_price = fields.Float(
+        'Sales Price',
+        digits=dp.get_precision('Product Price'),
+        help="Price at which the product is sold to customers.",
+    )
+
+    standard_price = fields.Float(
+        'Cost',
+        digits=dp.get_precision('Product Price'),
+        help=
+        "Cost used for stock valuation in standard price and as a first price to set in average/FIFO."
+    )
+
+    total_margin_rate = fields.Float(
+        related='product_id.total_margin_rate',
+        string='Total Margin Rate(%)',
+        help="Total margin * 100 / Turnover")
+
+    @api.onchange('product_id')
+    def change_default_value(self):
+        if self.product_id:
+            self.lst_price = self.product_id.lst_price
+            self.standard_price = self.product_id.standard_price
+            self.description = self.product_id.description
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res_id = super(StockMoveLineExt, self).create(vals_list)
+
+        for vals in vals_list:
+
+            if 'product_id' in vals and 'lst_price' not in vals:
+                product = self.env['product.product'].browse(vals['product_id'])
+
+                if product.exists():
+                    res_id.lst_price = product.lst_price
+                    res_id.standard_price = product.standard_price
+                    res_id.description = product.description
+
+            if 'lst_price' in vals:
+                self.product_id.write({'lst_price': vals.get('lst_price', 0)})
+            if 'standard_price' in vals:
+                self.product_id.write({
+                    'standard_price': vals.get('standard_price', 0)
+                })
+            if 'description' in vals:
+                self.product_id.write({'description': vals.get('description')})
+
+        return res_id
+
+    def write(self, vals):
+        res = super(StockMoveLineExt, self).write(vals)
+
+        if 'lst_price' in vals:
+            self.product_id.write({'lst_price': vals.get('lst_price', 0)})
+        if 'standard_price' in vals:
+            self.product_id.write({
+                'standard_price':
+                vals.get('standard_price', 0)
+            })
+        if 'description' in vals:
+            self.product_id.write({'description': vals.get('description')})
+
+        return res
