@@ -26,10 +26,23 @@ class StockMoveLineExt(models.Model):
         "Cost used for stock valuation in standard price and as a first price to set in average/FIFO."
     )
 
-    total_margin_rate = fields.Float(
-        related='product_id.total_margin_rate',
-        string='Total Margin Rate(%)',
-        help="Total margin * 100 / Turnover")
+    profit_margin = fields.Float(
+        compute="_compute_profit_margin",
+        string='Profit Margin (%)',
+        help="(Sale Price * 100 / Cost) - 100")
+
+    barcode = fields.Char(
+        related='product_id.barcode',
+        string='Barcode',
+        oldname='ean13',
+        help="International Article Number used for product identification.")
+
+    @api.depends('lst_price', 'standard_price')
+    def _compute_profit_margin(self):
+        for rec in self:
+            if rec.standard_price != 0 and rec.standard_price < rec.lst_price:
+                rec.profit_margin = (
+                    (rec.lst_price * 100) / rec.standard_price) - 100
 
     @api.onchange('product_id')
     def change_default_value(self):
@@ -45,7 +58,8 @@ class StockMoveLineExt(models.Model):
         for vals in vals_list:
 
             if 'product_id' in vals and 'lst_price' not in vals:
-                product = self.env['product.product'].browse(vals['product_id'])
+                product = self.env['product.product'].browse(
+                    vals['product_id'])
 
                 if product.exists():
                     res_id.lst_price = product.lst_price
@@ -56,7 +70,8 @@ class StockMoveLineExt(models.Model):
                 self.product_id.write({'lst_price': vals.get('lst_price', 0)})
             if 'standard_price' in vals:
                 self.product_id.write({
-                    'standard_price': vals.get('standard_price', 0)
+                    'standard_price':
+                    vals.get('standard_price', 0)
                 })
             if 'description' in vals:
                 self.product_id.write({'description': vals.get('description')})

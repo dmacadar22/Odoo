@@ -27,7 +27,10 @@
                 <xpath expr="//field[@name='product_id']" position="after">
                     <field name="lst_price" />
                     <field name="standard_price" />
-                    <field name="total_margin_rate" />
+
+                    <field name="barcode" />
+                    <field name="profit_margin" />
+
                 </xpath>
 
                 <xpath expr="//field[@name='owner_id']" position="after">
