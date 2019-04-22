@@ -31,11 +31,15 @@ class StockMoveLineExt(models.Model):
         string='Profit Margin (%)',
         help="(Sale Price * 100 / Cost) - 100")
 
-    barcode = fields.Char(
-        related='product_id.barcode',
-        string='Barcode',
-        oldname='ean13',
-        help="International Article Number used for product identification.")
+    total_cost_amount = fields.Float(
+        compute="_compute_total_cost_amount",
+        string='Cost Amount'
+    )
+
+    @api.depends('standard_price', 'qty_done')
+    def _compute_total_cost_amount(self):
+        for rec in self:
+            rec.total_cost_amount = rec.standard_price * rec.qty_done
 
     @api.depends('lst_price', 'standard_price')
     def _compute_profit_margin(self):
