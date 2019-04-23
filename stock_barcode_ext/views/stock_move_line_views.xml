@@ -28,7 +28,7 @@
                     <field name="lst_price" />
                     <field name="standard_price" />
 
-                    <field name="barcode" />
+                    <field name="product_barcode" />
                     <field name="profit_margin" />
 
                 </xpath>
@@ -37,6 +37,11 @@
                     <field name="description" />
                 </xpath>
 
+                
+                <xpath expr="//field[@name='qty_done']" position="after">
+                    <field name="total_cost_amount" />
+                </xpath>
+                
 
             </field>
         </record>

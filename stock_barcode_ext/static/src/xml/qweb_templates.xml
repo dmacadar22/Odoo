@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <t t-extend="stock_barcode.stock_barcode_lines_template">
+        <t t-jquery=".o_barcode_line_title" t-operation="before">
+            <p>VIVA</p>
+        </t>
+    </t>
+</templates>
