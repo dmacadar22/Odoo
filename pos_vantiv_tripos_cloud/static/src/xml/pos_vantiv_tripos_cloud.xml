@@ -8,6 +8,17 @@
 
         </div>
     </t>
+
+
+    <!-- <t t-extend="PaymentScreenWidget">
+        <t t-jquery="span.next" t-operation="replace">
+            <span class='button next'>
+                Finish Payment
+                <i class='fa fa-angle-double-right'></i>
+            </span>
+        </t>
+    </t> -->
+
     <!-- 
     <t t-name="TriposLaneScreenWidget" t-extend="ReceiptScreenWidget">
         <t t-jquery="div.top-content" t-operation="inner">
