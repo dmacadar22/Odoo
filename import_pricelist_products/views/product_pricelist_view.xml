@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="inherit_product_pricelist_view" model="ir.ui.view">
+            <field name="name">inherit_product_pricelist_view</field>
+            <field name="model">product.pricelist</field>
+            <field name="inherit_id" ref="product.product_pricelist_view" />
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='item_ids']" position="after">
+                    <button name="action_import_products" string="Import Products" class="oe_highlight" type="object" 
+                     groups="import_pricelist_products.group_support_pricelist_import"/>
+                </xpath>
+
+            </field>
+        </record>
+
+
+
+    </data>
+</odoo>
