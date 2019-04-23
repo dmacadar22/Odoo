@@ -5,7 +5,6 @@
     'name': 'Vantiv triPOS Cloud Payment Services',
     'version': '1.0',
     'category': 'Point of Sale',
-    'sequence':  'Credit card support for Point Of Sale',
     'description':
     """
 Allow credit card POS payments with triPOS Cloud
