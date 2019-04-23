@@ -32,6 +32,8 @@ _logger = logging.getLogger(__name__)
 class PosVantivTransaction(models.Model):
     _name = 'pos_vantiv_tripos_cloud.transaction'
 
+    name = fields.Char(string=_('Name'))
+
     @api.model
     def do_transaction(self, data):
         lane = self.env['pos_vantiv_tripos_cloud.lane'].search(

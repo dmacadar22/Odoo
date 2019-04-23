@@ -99,14 +99,12 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
                         message: _t("ERROR:A PIN pad exception occurred. No processor request attempted.")
                     });
                     return;
-                } 
-                else if (data === "lane not found") {
+                } else if (data === "lane not found") {
                     def.resolve({
                         message: _t("Lane not found.")
                     });
                     return;
-                }
-                else {
+                } else {
                     def.resolve({
                         message: _t("Please setup your Vantiv merchant account.")
                     });
