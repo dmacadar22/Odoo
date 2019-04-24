@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<templates xml:space="preserve">
+<templates id="template" xml:space="preserve">
 
     <t t-extend="stock_barcode.stock_barcode_lines_template">
-        <t t-jquery=".o_barcode_line_title" t-operation="before">
-            <p>VIVA</p>
+        <t t-jquery=".o_edit" t-operation="replace">
+            <p>VIVA 
+                <t t-esc="line.total_cost_amount" />
+            </p>
         </t>
     </t>
 </templates>

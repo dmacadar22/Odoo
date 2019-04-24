@@ -44,9 +44,8 @@ class StockMoveLineExt(models.Model):
     @api.depends('lst_price', 'standard_price')
     def _compute_profit_margin(self):
         for rec in self:
-            if rec.standard_price != 0 and rec.standard_price < rec.lst_price:
-                rec.profit_margin = (
-                    (rec.lst_price * 100) / rec.standard_price) - 100
+            if rec.lst_price != 0:
+                rec.profit_margin = ((rec.lst_price - rec.standard_price) / rec.lst_price) * 100
 
     @api.onchange('product_id')
     def change_default_value(self):
