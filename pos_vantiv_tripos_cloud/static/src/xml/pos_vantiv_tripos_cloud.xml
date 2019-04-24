@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="TriposLaneButton">
+        <div class='control-button o_lane_button'>
+            <i class='fa fa-th-list' role="img" aria-label="Select Lane" title="Select List" />
+            <t t-esc='widget.get_current_lane_name()' />
+
+        </div>
+    </t>
+
+
+    <!-- <t t-extend="PaymentScreenWidget">
+        <t t-jquery="span.next" t-operation="replace">
+            <span class='button next'>
+                Finish Payment
+                <i class='fa fa-angle-double-right'></i>
+            </span>
+        </t>
+    </t> -->
+
+    <!-- 
+    <t t-name="TriposLaneScreenWidget" t-extend="ReceiptScreenWidget">
+        <t t-jquery="div.top-content" t-operation="inner">
+            <span class='button back'>
+                <i class='fa fa-angle-double-left'></i>
+                Back
+            </span>
+        </t>
+    </t> -->
+
+</templates>
