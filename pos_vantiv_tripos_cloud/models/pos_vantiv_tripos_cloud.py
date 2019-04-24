@@ -44,6 +44,15 @@ class PosVantivTriposCloudConfiguration(models.Model):
         required=True,
         help='Version Application of the Express API Credentials Account')
 
+    is_production = fields.Boolean(
+        string=_('Is production ?'), default=False
+    )
+
+    is_vantiv = fields.Boolean(
+        string=_('Is Vantiv?'), default=True
+    )
+
+
 
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
@@ -136,10 +145,8 @@ class PosVantivTriposCloudLane(models.Model):
             }
 
             base_url = "https://triposcert.vantiv.com/cloudapi/v1/lanes"
-
-            print(base_url)
-            print(headers)
-            print(data)
+            if rec.is_production:
+                base_url = "https://tripos.vantiv.com/cloudapi/v1/lanes"
 
             req = requests.post(base_url, headers=headers, data=json.dumps(data))
 

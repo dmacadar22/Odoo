@@ -13,7 +13,11 @@
                             <h1>
                                 <field name="name" />
                             </h1>
+
                         </div>
+                        <group>
+                            <field name="is_production" label="Is Production?" />
+                        </group>
                         <div>
                             <p>
                                 <i>triPOS Cloud Configurations</i> define what Express API Credentials will be used when
