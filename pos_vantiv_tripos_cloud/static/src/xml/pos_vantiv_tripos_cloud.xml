@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
 
-    <t t-name="TriposLaneButton">
+    <!-- <t t-name="TriposLaneButton">
         <div class='control-button o_lane_button'>
             <i class='fa fa-th-list' role="img" aria-label="Select Lane" title="Select List" />
             <t t-esc='widget.get_current_lane_name()' />
 
         </div>
-    </t>
+    </t> -->
 
 
     <!-- <t t-extend="PaymentScreenWidget">

@@ -22,7 +22,8 @@ cards. The transactions are processed by triPOS Cloud (developed by Company).
         # Load Views
         'views/pos_vantiv_tripos_cloud_views.xml',
         'views/pos_vantiv_tripos_lane_views.xml',
-        'views/pos_order_views.xml',
+        # 'views/pos_order_views.xml',
+        'views/pos_config_views.xml',
         # Load Menus
         'views/menus.xml',
         # Load js and css for POS
