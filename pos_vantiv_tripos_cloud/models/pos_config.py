@@ -9,4 +9,4 @@ class PosConfig(models.Model):
 
     lane_id = fields.Many2one(
         comodel_name='pos_vantiv_tripos_cloud.lane',
-        string=_('Lane'))
+        string=_('Lane'), required=True)

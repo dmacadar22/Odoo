@@ -14,6 +14,7 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
     var _payline = pos_models.Paymentline.prototype;
 
     pos_models.load_fields('account.journal','pos_vantiv_tripos_cloud_config_id');
+
     pos_models.PosModel = pos_models.PosModel.extend({
         getOnlineVantivPaymentJournals: function () {
             var self = this;
@@ -220,15 +221,21 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
                         self.reset_input();
                         self.render_paymentlines();
                         order.trigger('change', order); // needed so that export_to_JSON gets triggered
+
                         def.resolve({
-                            message: _t("Success transaction."),
+                            message: _t("Transaction Successful"),
                             auto_close: true,
                         });
-                        return;
                     }
                     if (data['statusCode'] === "UnsupportedCard") {
                         def.resolve({
-                            message: _t("Please setup lane in your POS.")
+                            message: _t("Card is gift only card but the configuration does not allow for gift transactions.")
+                        });
+                        return;
+                    }
+                    if (data['statusCode'] === "Failed") {
+                        def.resolve({
+                            message: _t("Failed. Transaction Duplicated.")
                         });
                         return;
                     }
@@ -241,12 +248,6 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
                     if (data['statusCode'] === "Declined") {
                         def.resolve({
                             message: _t("WARN:Offline processing result tags does not contain cryptogram information data.")
-                        });
-                        return;
-                    }
-                    if (data['statusCode'] === "UnsupportedCard") {
-                        def.resolve({
-                            message: _t("Card is debit only card but the configuration does not allow for debit transactions.")
                         });
                         return;
                     }
@@ -279,7 +280,6 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
         },
 
         credit_code_action: function (parsed_result) {
-            console.log('entro aqui credit code', parsed_result);
             var self = this;
             var online_payment_journals = this.pos.getOnlineVantivPaymentJournals();
 
@@ -314,8 +314,7 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
             this._super(cid);
         },
 
-
-            // make sure there is only one paymentline waiting for a swipe
+        // make sure there is only one paymentline waiting for a swipe
         click_paymentmethods: function (id) {
             console.log('Click payment');
             var i;
@@ -358,6 +357,16 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
 
         },
 
+        renderElement: function(){
+            var self = this;
+            this._super();
+
+            this.$('.pay').click(function(){
+                self.credit_code_action(this);
+            });
+
+        },
+
         show: function () {
             this._super();
             if (this.pos.getOnlineVantivPaymentJournals().length !== 0) {
@@ -367,19 +376,7 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
         },
 
         validate_order: function (force_validation) {
-            console.log('Validate ', this, this.pos.get_order());
-
-            var lines = this.pos.get_order().get_paymentlines();
-
-            for(var i = 0; i < lines.length; i++) {
-                if(lines[i].vantiv_swipe_pending){
-                    this.credit_code_action(this);
-                    break;
-                }
-            }
-
             if (this.pos.get_order().is_paid() && ! this.invoicing) {
-                console.log('Entro al if');
                 var lines = this.pos.get_order().get_paymentlines();
 
                 for (var i = 0; i < lines.length; i++) {
@@ -389,7 +386,6 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
                     }
                 }
             }
-
             this._super(force_validation);
         },
     });
