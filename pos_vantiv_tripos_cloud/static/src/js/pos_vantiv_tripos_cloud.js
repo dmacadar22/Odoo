@@ -245,6 +245,13 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
                         });
                         return;
                     }
+                    if (data['statusCode'] === "Cancelled") {
+                        def.resolve({
+                            message: _t("ERROR:A PIN pad exception occurred. The request has been canceled.")
+                        });
+                        return;
+                    }
+
                     if (data['statusCode'] === "Declined") {
                         def.resolve({
                             message: _t("WARN:Offline processing result tags does not contain cryptogram information data.")
@@ -299,30 +306,33 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
             }
         },
 
-        click_delete_paymentline: function (cid) {
-            var lines = this.pos.get_order().get_paymentlines();
-            console.log('Click delete payment');
-            console.log(lines);
-
-//            for (var i = 0; i < lines.length; i++) {
-//                if (lines[i].cid === cid && lines[i].mercury_data) {
-//                    this.do_reversal(lines[i], false);
-//                    return;
-//                }
-//            }
-
-            this._super(cid);
-        },
+//        click_delete_paymentline: function (cid) {
+//            var lines = this.pos.get_order().get_paymentlines();
+//            console.log('Click delete payment');
+//            console.log(lines);
+//
+////            for (var i = 0; i < lines.length; i++) {
+////                if (lines[i].cid === cid && lines[i].mercury_data) {
+////                    this.do_reversal(lines[i], false);
+////                    return;
+////                }
+////            }
+//
+//            this._super(cid);
+//
+//
+//        },
 
         // make sure there is only one paymentline waiting for a swipe
         click_paymentmethods: function (id) {
-            console.log('Click payment');
+            console.log('Click payment', this, id);
             var i;
             var order = this.pos.get_order();
             var cashregister = null;
             for (i = 0; i < this.pos.cashregisters.length; i++) {
                 if (this.pos.cashregisters[i].journal_id[0] === id){
                     cashregister = this.pos.cashregisters[i];
+                    console.log('tfind', this.$el.find('.pay').addClass('pay_highlight'));
                     break;
                 }
             }
@@ -332,6 +342,9 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
                 var lines = order.get_paymentlines();
 
                 for (i = 0; i < lines.length; i++) {
+                    if (lines[i].vantiv_swipe_pending ){
+                        console.log(this);
+                    }
                     if (lines[i].cashregister.journal.pos_vantiv_tripos_cloud_config_id && lines[i].vantiv_swipe_pending) {
                         already_swipe_pending = true;
                     }

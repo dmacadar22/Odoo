@@ -6,6 +6,10 @@
     right: 0;
     margin-right: 140px;
 }
+.screen .top-content .button.pay.pay_highlight {
+    background: rgb(239, 153, 65);
+    color: #fff;
+}
 
 .pos .paymentline.selected.o_pos_vantiv_swipe_pending, .pos .paymentline.o_pos_vantiv_swipe_pending {
     background: rgb(239, 153, 65);
