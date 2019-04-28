@@ -122,20 +122,13 @@ class PosVantivTriposCloudLane(models.Model):
                 'content-type': 'application/json',
                 'charset': 'utf-8',
                 'tp-authorization': 'Version=2.0',
-                'tp-application-id':
-                config_obj.express_api_credentials_application_id,
-                'tp-application-name':
-                config_obj.express_api_credentials_application_name,
-                'tp-application-version':
-                config_obj.express_api_credentials_application_version,
-                'tp-express-acceptor-id':
-                config_obj.express_api_credentials_acceptor_id,
-                'tp-express-account-id':
-                config_obj.express_api_credentials_account_id,
-                'tp-express-account-token':
-                config_obj.express_api_credentials_account_token,
-                'tp-request-id':
-                str(guid)
+                'tp-application-id':  config_obj.express_api_credentials_application_id,
+                'tp-application-name': config_obj.express_api_credentials_application_name,
+                'tp-application-version': config_obj.express_api_credentials_application_version,
+                'tp-express-acceptor-id': config_obj.express_api_credentials_acceptor_id,
+                'tp-express-account-id':  config_obj.express_api_credentials_account_id,
+                'tp-express-account-token':  config_obj.express_api_credentials_account_token,
+                'tp-request-id': str(guid)
             }
             data = {
                 'laneId': int(rec.lane_id),
@@ -145,7 +138,7 @@ class PosVantivTriposCloudLane(models.Model):
             }
 
             base_url = "https://triposcert.vantiv.com/cloudapi/v1/lanes"
-            if rec.is_production:
+            if config_obj.is_production:
                 base_url = "https://tripos.vantiv.com/cloudapi/v1/lanes"
 
             req = requests.post(base_url, headers=headers, data=json.dumps(data))
@@ -189,15 +182,12 @@ class PosVantivTriposCloudLane(models.Model):
                 'tp-express-account-token'] = config_obj.express_api_credentials_account_token
             config.headers['tp-request-id'] = str(uuid.uuid4())
 
-            base_url = "{}/lanes/{}".format(
-                config.cert.get('url_lane_management_api_certification'),
-                rec.lane_id)
+            base_url = "https://triposcert.vantiv.com/cloudapi/v1/lanes/{}".format(rec.lane_id)
+            if config_obj.is_production:
+                base_url = "https://tripos.vantiv.com/cloudapi/v1/lanes/{}".format(rec.lane_id)
 
             req = requests.delete(
                 '{}'.format(base_url), headers=config.headers, data=data)
-
-            # rec.state = 'del'
-            # return True
 
             if req.status_code == 200:
                 rec.state = 'added'
