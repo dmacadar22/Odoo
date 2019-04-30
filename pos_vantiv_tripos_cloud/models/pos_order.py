@@ -9,7 +9,7 @@ from odoo.exceptions import UserError
 class PosOrder(models.Model):
     _inherit = 'pos.order'
 
-    lane_id = fields.Many2one('pos_vantiv_tripos_cloud.lane', related='config_id.lane_id', string="POS Lane", readonly=False)
+    lane_id = fields.Many2one('pos_vantiv_tripos_cloud.lane', related='config_id.lane_id', string="POS Lane")
 
     @api.model
     def _order_fields(self, ui_order):
