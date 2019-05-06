@@ -241,13 +241,13 @@ odoo.define('pos_vantiv_tripos_cloud.pos_vantiv_tripos_cloud', function (require
                     }
                     if (data['statusCode'] === "PinPadError") {
                         def.resolve({
-                             message: _t("ERROR:A PIN pad exception occurred. No processor request attempted.")
+                             message: _t("No processor request attempted.")
                         });
                         return;
                     }
                     if (data['statusCode'] === "Cancelled") {
                         def.resolve({
-                            message: _t("ERROR:A PIN pad exception occurred. The request has been canceled.")
+                            message: _t("The request has been canceled.")
                         });
                         return;
                     }

@@ -64,13 +64,14 @@ class PosVantivTransaction(models.Model):
         if not lane.exists():
             return "not setup"
 
-        _logger.info("Vantiv Lane".format(lane))
+        _logger.info("Vantiv Lane {} ".format(lane.name))
         # Payment request
         body = {}
         body['laneId'] = lane.lane_id
         body['transactionAmount'] = data.get('amount_total')
         body['ReferenceNumber'] = random.randint(1, 101) * 5
         body['TicketNumber'] = random.randint(1, 101) * 5
+        body['configuration'] = {'allowDebit': True}
         # print(body)
         guid = uuid.uuid4()
 
