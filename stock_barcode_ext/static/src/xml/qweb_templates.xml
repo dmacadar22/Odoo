@@ -1,11 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<templates id="template" xml:space="preserve">
+<templates id="template" inherit_id="stock_barcode.template">
 
-    <t t-extend="stock_barcode.stock_barcode_lines_template">
-        <t t-jquery=".o_edit" t-operation="replace">
-            <p>VIVA 
-                <t t-esc="line.total_cost_amount" />
-            </p>
+    <t t-extend="stock_barcode_lines_widget">
+        <t t-jquery=".o_barcode_lines" t-operation="after">
+            <div class="d-flex flex-column justify-content-right align-items-right bg-100">
+                <span class="d-inline-block text-right mr-3"><strong>Total Invoice: </strong>
+                    <i class="fa fa-dollar"/> <t t-esc='widget.partial_amount_total'/> / <i class="fa fa-dollar"/> <t t-esc="widget.amount_total"/>
+                </span>
+            </div>
+        </t>
+    </t>
+
+    <t t-extend="stock_barcode_lines_template">
+        <t t-jquery=".o_barcode_line_title" t-operation="after">
+
+            <div class="d-inline-block pb-2">
+                <i class="fa fa-fw fa-barcode"/>
+                <span class="price-subtotal d-inline-block text-left">
+                    <t t-esc="line.product_barcode"/>
+                </span>
+            </div>
+            <div class="d-inline-block pb-2 ml-3">
+                <i class="fa fa-fw fa-percent"/>
+                <span class="price-subtotal d-inline-block text-left">
+                    <t t-esc='line.profit_margin'/>
+                </span>
+            </div>
+            <div class="d-inline-block">
+                <i class="fa fa-fw fa-dollar"/>
+                <span class="price-subtotal d-inline-block text-left">Invoice Line Total
+                    <input t-att-name="price_subtotal" type="text" t-att-value='line.price_subtotal'
+                           class="o_input oe_price_subtotal" t-att-data-price_subtotal="line.price_subtotal"/>
+                </span>
+            </div>
+            <div class="d-inline-block">
+                <i class="fa fa-fw fa-cube"/>
+                <span class="d-inline-block">Quantity
+                    <input type="text" t-att-data-qty_done="line.qty_done"
+                           t-att-value='line.qty_done' class="o_input oe_qty_done "/>
+                </span>
+            </div>
+            <div class="d-inline-block">
+                <i class="fa fa-fw fa-dollar"/>
+                <span class="list-price d-inline-block text-left ">Sales Price
+                    <input t-att-name='line.id' type="text" t-att-data-list_price="line.list_price"
+                           t-att-value='line.list_price'
+                           class="o_input oe_list_price"/>
+                </span>
+            </div>
+            <div class="d-inline-block">
+                <i class="fa fa-fw fa-dollar"/>
+                <span class="price-subtotal d-inline-block text-left">Cost
+                    <t t-esc='line.standard_price'/>
+                </span>
+            </div>
+        </t>
+
+        <t t-jquery=".o_edit" t-operation="before">
+            <!--            <button class="o_save fa fa-save">Save</button>-->
+            <a class="o_save_line text-muted" title="Save">
+                <i class="fa fa-save"/>
+            </a>
         </t>
     </t>
 </templates>

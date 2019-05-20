@@ -1,51 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <data >
+    <data>
 
         <!-- Form view for "model" -->
+<!--        <record id="view_move_line_ext_form" model="ir.ui.view">-->
+<!--            <field name="name">view.move.line.ext.form</field>-->
+<!--            <field name="model">stock.move.line</field>-->
+<!--            <field name="inherit_id" ref="stock.view_move_line_form"/>-->
+<!--            <field name="arch" type="xml">-->
+
+<!--                <xpath expr="//field[@name='product_id']" position="after">-->
+<!--                    <field name="list_price"/>-->
+<!--                    <field name="standard_price"/>-->
+<!--                </xpath>-->
+
+<!--            </field>-->
+<!--        </record>-->
+
+
         <record id="view_move_line_ext_form" model="ir.ui.view">
             <field name="name">view.move.line.ext.form</field>
             <field name="model">stock.move.line</field>
-            <field name="inherit_id" ref="stock.view_move_line_form" />
+            <field name="inherit_id" ref="stock_barcode.stock_move_line_product_selector"/>
             <field name="arch" type="xml">
 
-                <xpath expr="//field[@name='product_id']" position="after">
-                    <field name="lst_price" />
-                    <field name="standard_price" />
+                <xpath expr="//field[@name='qty_done']" position="after">
+                    <field name="price_subtotal" readonly="0"/>
+                    <field name="standard_price"/>
+                    <field name="list_price" readonly="0"/>
+                    <field name="product_barcode" readonly="1"/>
+                    <field name="profit_margin"/>
                 </xpath>
 
-            </field>
-        </record>
-
-
-        <record id="view_move_line_ext_form" model="ir.ui.view">
-            <field name="name">view.move.line.ext.form</field>
-            <field name="model">stock.move.line</field>
-            <field name="inherit_id" ref="stock_barcode.stock_move_line_product_selector" />
-            <field name="arch" type="xml">
-
-                <xpath expr="//field[@name='product_id']" position="after">
-                    <field name="lst_price" />
-                    <field name="standard_price" />
-
-                    <field name="product_barcode" />
-                    <field name="profit_margin" />
-
-                </xpath>
 
                 <xpath expr="//field[@name='owner_id']" position="after">
-                    <field name="description" />
+                    <field name="description" readonly="0"/>
                 </xpath>
 
-                
-                <xpath expr="//field[@name='qty_done']" position="after">
-                    <field name="total_cost_amount" />
-                </xpath>
-                
 
             </field>
         </record>
-
 
 
     </data>
