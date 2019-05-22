@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="stock_picking_kanban" model="ir.ui.view">
+            <field name="name">stock.barcode.ext.picking.kanban</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock_barcode.stock_picking_kanban"/>
+            <field name="arch" type="xml">
+                <xpath expr="//kanban[hasclass('o_kanban_mobile')]" position="attributes">
+                    <attribute name="create">true</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_picking_form" model="ir.ui.view">
+            <field name="name">stock.picking.form</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="open_action_receive" string="Go to receive" type="object"
+                            class="oe_stat_button" icon="fa-truck"/>
+                </xpath>
+
+                <xpath expr="//group[1]" position="after">
+                    <separator string="Receiving Information"/>
+                    <group>
+                        <group>
+                            <field name="amount_total"/>
+                            <field name="distribute_freight"/>
+                            <field name="discount"/>
+                        </group>
+                        <group>
+                            <field name="freight_charges"/>
+                            <field name="miscellaneous_charges"/>
+                            <field name="tax"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_picking_ext_form" model="ir.ui.view">
+            <field name="name">stock.picking.ext.form</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="attributes">
+                    <attribute name="attrs">{'invisible':[('state', '!=', 'done')]}</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="stock_barcode.stock_picking_type_action_kanban" model="ir.actions.act_window">
+            <field name="context">{
+                'form_view_initial_mode': 'edit',
+                'force_detailed_view': False,
+                }
+            </field>
+        </record>
+
+        <record id="stock_barcode.stock_picking_action_kanban" model="ir.actions.act_window">
+            <field name="context">{'form_view_initial_mode': 'edit',
+                'search_default_picking_type_id': [active_id],
+                'default_picking_type_id': active_id,
+                'contact_display': 'partner_address',
+                'search_default_available': 1,
+                'search_default_draft': 1,
+                'force_detailed_view': False,
+                }
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="stock_picking_ext_action_kanban">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="stock_picking_kanban"/>
+            <field name="act_window_id" ref="stock_barcode.stock_picking_action_kanban"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="stock_picking_ext_action_form">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_picking_ext_form"/>
+            <field name="act_window_id" ref="stock_barcode.stock_picking_action_kanban"/>
+        </record>
+
+
+    </data>
+</odoo>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="stock_barcode_ext_assets" inherit_id="stock_barcode.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/stock_barcode_ext/static/src/js/stock_barcode_ext.js"></script>
+                <link rel="stylesheet" href="/stock_barcode_ext/static/src/css/stock_barcode_ext.css" />
+            </xpath>
+        </template>
+
+    </data>
+</odoo>
