@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="account_reports_backend_extended" inherit_id="web.assets_backend" active="True">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" type="text/scss" href="/financial_report_levels/static/src/scss/account_financial_report.scss"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>
