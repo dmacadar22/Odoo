@@ -25,7 +25,7 @@ class StockMoveLineExt(models.Model):
         'Sales Price', related="product_id.list_price",
         digits=dp.get_precision('Product Price'),
         help="Price at which the product is sold to customers.",
-        store=True
+        # store=True
     )
 
     standard_price = fields.Float(
@@ -33,7 +33,7 @@ class StockMoveLineExt(models.Model):
         string='Cost',
         digits=dp.get_precision('Product Price'),
         help="Cost used for stock valuation in standard price and as a first price to set in average/FIFO.",
-        store=True
+        # store=True
     )
 
     profit_margin = fields.Float(
