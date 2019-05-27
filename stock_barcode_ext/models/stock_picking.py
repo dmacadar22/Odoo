@@ -8,18 +8,18 @@ from odoo.exceptions import UserError, ValidationError
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    amount_total = fields.Float(string="Invoice Total", states={
+    amount_total = fields.Float(string="Invoice Total", digits=dp.get_precision('Product Price'), states={
         'done': [('readonly', True)],
         'cancel': [('readonly', True)],
     }, readonly=False)
 
-    partial_amount_total = fields.Float(string="Invoice Partial Total", compute="compute_partial_amount")
+    partial_amount_total = fields.Float(string="Invoice Partial Total", digits=dp.get_precision('Product Price'), compute="compute_partial_amount")
 
-    freight_charges = fields.Float(string="Freight Charges")
+    freight_charges = fields.Float(string="Freight Charges", digits=dp.get_precision('Product Price'),)
     distribute_freight = fields.Boolean(string="Distribute Freight?")
-    miscellaneous_charges = fields.Float(string="Miscellaneous Charges")
-    discount = fields.Float(string="Discounts")
-    tax = fields.Float(string="Taxes")
+    miscellaneous_charges = fields.Float(string="Miscellaneous Charges", digits=dp.get_precision('Product Price'),)
+    discount = fields.Float(string="Discounts", digits=dp.get_precision('Product Price'),)
+    tax = fields.Float(string="Taxes", digits=dp.get_precision('Product Price'),)
 
     @api.onchange('freight_charges')
     def onchange_freight_charges(self):
