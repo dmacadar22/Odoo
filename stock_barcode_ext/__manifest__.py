@@ -9,7 +9,7 @@
         """,
     'category': 'Warehouse',
     'version': '1.0',
-    'depends': ['stock_barcode', 'product_margin'],
+    'depends': ['stock_barcode', 'purchase', 'product_margin'],
     'data': ['views/stock_barcode_ext_views.xml', 'views/stock_move_line_views.xml',
              'views/stock_barcode_ext_templates.xml'],
     'qweb': [

@@ -64,7 +64,7 @@ class StockPicking(models.Model):
                 'result_package_id',
                 'dummy_id',
                 'price_subtotal',
-                'list_price', 'standard_price', 'profit_margin', 'amount_total', 'qty_done_virtual'
+                'list_price', 'standard_price', 'profit_margin', 'amount_total'
             ])
             for move_line_id in picking['move_line_ids']:
                 move_line_id['product_id'] = \

@@ -11,9 +11,6 @@ class StockMoveLineExt(models.Model):
     amount_total = fields.Float(related="picking_id.amount_total", string="Invoice Total",
                                 digits=dp.get_precision('Product Price'), )
 
-    qty_done_virtual = fields.Float('Done', related="qty_done", default=0.0,
-                                    digits=dp.get_precision('Product Unit of Measure'), copy=False)
-
     description = fields.Text(
         'Product Description',
         related="product_id.description",
