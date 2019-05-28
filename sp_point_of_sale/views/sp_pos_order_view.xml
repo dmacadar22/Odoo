@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Form -->
+        <record id="sp_view_pos_pos_inherit_form" model="ir.ui.view">
+            <field name="name">sp.pos.order.inherit.form</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet/notebook/page[1]/field[@name='lines']/tree/field[@name='product_id']" position="after">
+                    <field name="department_id"/>
+                </xpath>
+                <xpath expr="//form/sheet/notebook/page[1]/field[@name='lines']/form/group/field[@name='product_id']" position="after">
+                    <field name="department_id"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
