@@ -21,6 +21,10 @@ class StockPicking(models.Model):
     discount = fields.Float(string="Discounts", digits=dp.get_precision('Product Price'),)
     tax = fields.Float(string="Taxes", digits=dp.get_precision('Product Price'),)
 
+    @api.onchange('miscellaneous_charges')
+    def onchange_miscellaneous_charges(self):
+        self.amount_total += self.miscellaneous_charges
+
     @api.onchange('freight_charges')
     def onchange_freight_charges(self):
         self.amount_total += self.freight_charges
@@ -40,7 +44,7 @@ class StockPicking(models.Model):
     @api.depends('move_line_ids')
     def compute_partial_amount(self):
         for rec in self:
-            rec.partial_amount_total = sum(rec.move_line_ids.mapped('price_subtotal'))
+            rec.partial_amount_total = round(sum(rec.move_line_ids.mapped('price_subtotal')), 2)
 
     def get_barcode_view_state(self):
         """ Return the initial state of the barcode view as a dict.
@@ -124,17 +128,17 @@ class StockPicking(models.Model):
             'partial_amount_total'
         ]
 
-    @api.multi
-    def button_validate(self):
-        if not self._context:
-            if self.move_line_ids:
-                total = sum([move_line.price_subtotal for move_line in self.move_line_ids])
-                if self.amount_total != total:
-                    raise UserError(_('Error. The amounts are different. Invoice amount {} - Receiving amount {}'.format(
-                        self.amount_total, total)))
-
-        res = super(StockPicking, self).button_validate()
-        return res
+    # @api.multi
+    # def button_validate(self):
+    #     if not self._context:
+    #         if self.move_line_ids:
+    #             total = sum([move_line.price_subtotal for move_line in self.move_line_ids])
+    #             if self.amount_total != total:
+    #                 raise UserError(_('Error. The amounts are different. Invoice amount {} - Receiving amount {}'.format(
+    #                     self.amount_total, total)))
+    #
+    #     res = super(StockPicking, self).button_validate()
+    #     return res
 
     def open_action_receive(self):
         self.ensure_one()

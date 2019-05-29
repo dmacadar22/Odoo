@@ -87,8 +87,6 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
                         action[0].apply(self.linesWidget, action[1]);
                         // self._reloadLineWidget(self.currentPageIndex);
                     });
-                    console.log(self.linesWidget);
-                    console.log(linesActions);
                     self._save().then(function () {
                         self._reloadLineWidget(self.currentPageIndex);
                     });
@@ -109,6 +107,8 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
             current.data('list_price', current.val());
             this.list_price = current.val();
             console.log($(ev.currentTarget).val());
+            self._onClickSaveLine(ev);
+
         },
 
         _onQty: function (ev) {
@@ -119,6 +119,7 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
             this.qty_done = current.val();
             current.data('qty_done', current.val());
             console.log($(ev.currentTarget).val());
+            self._onClickSaveLine(ev);
         },
 
         _onTotal: function (ev) {
@@ -129,6 +130,7 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
             current.attr('data-price_subtotal', current.val());
             current.data('price_subtotal', current.val());
             console.log($(ev.currentTarget).val());
+            self._onClickSaveLine(ev);
         },
 
         _onReload: function (ev) {
