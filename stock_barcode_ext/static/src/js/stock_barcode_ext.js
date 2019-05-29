@@ -30,73 +30,76 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
             this.list_price = -1;
         },
 
-        // _onBarcodeScanned: function (barcode) {
-        //     var self = this;
-        //     return this.stepsByName[this.currentStep || 'source'](barcode, []).then(function (res) {
-        //         /* We check now if we need to change page. If we need to, we'll call `this.save` with the
-        //          * `new_location_id``and `new_location_dest_id` params so `this.currentPage` will
-        //          * automatically be on the new page. We need to change page when we scan a source or a
-        //          * destination location ; if the source or destination is different than the current
-        //          * page's one.
-        //          */
-        //         var def = $.when();
-        //         var currentPage = self.pages[self.currentPageIndex];
-        //         if (
-        //             (self.scanned_location &&
-        //                 !self.scannedLines.length &&
-        //                 self.scanned_location.id !== currentPage.location_id
-        //             ) ||
-        //             (self.scanned_location_dest &&
-        //                 self.scannedLines.length &&
-        //                 self.scanned_location_dest.id !== currentPage.location_dest_id
-        //             )
-        //         ) {
-        //             // The expected locations are the scanned locations or the default picking locations.
-        //             var expectedLocationId = self.scanned_location.id;
-        //             var expectedLocationDestId;
-        //             if (self.actionParams.model === 'stock.picking') {
-        //                 expectedLocationDestId = self.scanned_location_dest &&
-        //                     self.scanned_location_dest.id ||
-        //                     self.currentState.location_dest_id.id;
-        //                 // self._reloadLineWidget(self.currentPageIndex);
-        //             }
-        //
-        //             if (expectedLocationId !== currentPage.location_id ||
-        //                 expectedLocationDestId !== currentPage.location_dest_id
-        //             ) {
-        //                 var params = {
-        //                     new_location_id: expectedLocationId,
-        //                 };
-        //                 if (expectedLocationDestId) {
-        //                     params.new_location_dest_id = expectedLocationDestId;
-        //                 }
-        //                 def = self._save(params).then(function () {
-        //                     self._reloadLineWidget(self.currentPageIndex);
-        //                 });
-        //             }
-        //         }
-        //
-        //         // Apply now the needed actions on the different widgets.
-        //         if (self.scannedLines && self.scanned_location_dest) {
-        //             self._endBarcodeFlow();
-        //         }
-        //         var linesActions = res.linesActions;
-        //         def.always(function () {
-        //             _.each(linesActions, function (action) {
-        //                 action[0].apply(self.linesWidget, action[1]);
-        //                 // self._reloadLineWidget(self.currentPageIndex);
-        //
-        //             });
-        //             // self._save({'forceReload': true}).then(function () {
-        //             //     // self._reloadLineWidget(self.currentPageIndex);
-        //             // });
-        //             return $.when();
-        //         });
-        //         return def;
-        //     }, function (errorMessage) {
-        //         self.do_warn(_t('Warning'), errorMessage);
-        //     });
-        // },
+        _onBarcodeScanned: function (barcode) {
+            var self = this;
+            return this.stepsByName[this.currentStep || 'source'](barcode, []).then(function (res) {
+                /* We check now if we need to change page. If we need to, we'll call `this.save` with the
+                 * `new_location_id``and `new_location_dest_id` params so `this.currentPage` will
+                 * automatically be on the new page. We need to change page when we scan a source or a
+                 * destination location ; if the source or destination is different than the current
+                 * page's one.
+                 */
+                var def = $.when();
+                var currentPage = self.pages[self.currentPageIndex];
+                if (
+                    (self.scanned_location &&
+                        !self.scannedLines.length &&
+                        self.scanned_location.id !== currentPage.location_id
+                    ) ||
+                    (self.scanned_location_dest &&
+                        self.scannedLines.length &&
+                        self.scanned_location_dest.id !== currentPage.location_dest_id
+                    )
+                ) {
+                    // The expected locations are the scanned locations or the default picking locations.
+                    var expectedLocationId = self.scanned_location.id;
+                    var expectedLocationDestId;
+                    if (self.actionParams.model === 'stock.picking') {
+                        expectedLocationDestId = self.scanned_location_dest &&
+                            self.scanned_location_dest.id ||
+                            self.currentState.location_dest_id.id;
+                        // self._reloadLineWidget(self.currentPageIndex);
+                    }
+
+                    if (expectedLocationId !== currentPage.location_id ||
+                        expectedLocationDestId !== currentPage.location_dest_id
+                    ) {
+                        var params = {
+                            new_location_id: expectedLocationId,
+                        };
+                        if (expectedLocationDestId) {
+                            params.new_location_dest_id = expectedLocationDestId;
+                        }
+                        def = self._save(params).then(function () {
+                            self._reloadLineWidget(self.currentPageIndex);
+                        });
+
+                    }
+                }
+
+                // Apply now the needed actions on the different widgets.
+                if (self.scannedLines && self.scanned_location_dest) {
+                    self._endBarcodeFlow();
+                }
+                var linesActions = res.linesActions;
+                def.always(function () {
+                    _.each(linesActions, function (action) {
+                        action[0].apply(self.linesWidget, action[1]);
+                        // self._reloadLineWidget(self.currentPageIndex);
+                    });
+                    console.log(self.linesWidget);
+                    console.log(linesActions);
+                    self._save().then(function () {
+                        self._reloadLineWidget(self.currentPageIndex);
+                    });
+
+                    return $.when();
+                });
+                return def;
+            }, function (errorMessage) {
+                self.do_warn(_t('Warning'), errorMessage);
+            });
+        },
 
         _onPrice: function (ev) {
             var self = this;
