@@ -130,7 +130,24 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
             current.attr('data-price_subtotal', current.val());
             current.data('price_subtotal', current.val());
             console.log($(ev.currentTarget).val());
-            self._onClickSaveLine(ev);
+            // self._onClickSaveLine(ev);
+            var vals = {'id': id};
+            vals['price_subtotal'] = current.val();
+
+            this.mutex.exec(function () {
+                return self._save().then(function () {
+                    return self._rpc({
+                        model: 'stock.move.line',
+                        method: 'calculate_cost',
+                        args: [vals],
+                    }).then(function (res) {
+                        var def = $.when();
+                        return def.then(function () {
+                            return self.trigger_up('reload');
+                        });
+                    });
+                });
+            });
         },
 
         _onReload: function (ev) {
