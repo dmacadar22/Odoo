@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+     <record id="inherit_account_invoice_form" model="ir.ui.view">
+        <field name="name">inherit.account.invoice.view.form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='date_due']" position="after">
+                <field name="purchase_order_id"
+                       attrs="{'invisible': [('type', '!=', 'in_refund')]}"
+                       domain="[('partner_id','=', partner_id)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
