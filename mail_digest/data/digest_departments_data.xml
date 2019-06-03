@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="daily_digest_departments_mail_template" model="mail.template">
+        <field name="name">Digest: Department Net Sales</field>
+        <field name="model_id" ref="digest.model_digest_digest"/>
+        <field name="auto_delete" eval="True"/>
+        <field name="email_from">${user.email}</field>
+        <field name="lang">${user.lang}</field>
+        <field name="body_html"><![CDATA[
+<table style="width: 100%; border-spacing: 0; font-family: Helvetica,Arial,Verdana,sans-serif;">
+    <tr>
+        <td align="center" valign="top" style="border-collapse: collapse; padding: 0">
+            % set company, user = ctx['company'], ctx['user']
+            % set data = object.compute_kpis(company, user)
+            % set tips = object.compute_tips(company, user)
+            % set kpi_actions = object.compute_kpis_actions(company, user)
+            % set kpis = data.yesterday.keys()
+
+            <table style="width: 100%;border-spacing: 0; border: 1px solid #e7e7e7; border-bottom: none; color: #6e7172; line-height: 23px; text-align: left;">
+                <tr>
+                    <td style="border-collapse: collapse; padding: 10px 40px; text-align: left;">
+                        <strong style="margin-left: -22px; color: #000000; font-size: 22px; line-height: 32px;">Department Net Sales, Margin and Volume Report</strong>
+                        <div style="color: #000000; font-size: 15px; margin-left:-22px;">${datetime.date.today().strftime('%B %d, %Y')}</div>
+                    </td>
+                    <td style="text-align: right; padding: 10px 40px">
+                        <img style="padding: 0px; margin: 0px; height: auto; width: 80px;" src="/logo.png?company=${company.id}"/>
+                    </td>
+                </tr>
+                <tr><td colspan="2" style="text-align: center;">
+                    <hr width="95%" style="background-color: rgb(204,204,204); border: medium none; clear: both; display: block; font-size: 0px; min-height: 1px; line-height: 0; margin: 16px 0px 16px 14px;"/>
+                </td></tr>
+            </table>
+
+            ${(kpi_actions['kpi_sales_department'])|safe}
+
+         </td>
+    </tr></table>
+        ]]></field>
+    </record>
+</odoo>
