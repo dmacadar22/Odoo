@@ -62,6 +62,12 @@ class StockMoveLineExt(models.Model):
             if rec.qty_done != 0.0:
                 rec.standard_price = round(rec.price_subtotal / rec.qty_done, 2)
 
+    @api.onchange('qty_done')
+    def _onchange_calculate_price(self):
+        for rec in self:
+            if rec.qty_done != 0.0:
+                rec.price_subtotal = round(rec.standard_price * rec.qty_done, 2)
+
     # def get_default_cost(self):
     #     return self.product_id.standard_price
 
@@ -84,6 +90,7 @@ class StockMoveLineExt(models.Model):
             self.list_price = self.product_id.list_price
             self.standard_price = self.product_id.standard_price
             self.description = self.product_id.description
+            self.price_subtotal = self.standard_price * self.qty_done
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -134,11 +141,11 @@ class StockMoveLineExt(models.Model):
                 if move_line.exists():
                     values = {}
                     if 'price_subtotal' in vals:
-                        values['price_subtotal'] = vals.get('price_subtotal', 0.0)
+                        values['price_subtotal'] = vals.get('price_subtotal')
                     if 'qty_done' in vals:
-                        values['qty_done'] = vals.get('qty_done', 0.0)
+                        values['qty_done'] = vals.get('qty_done')
                     if 'list_price' in vals:
-                        values['list_price'] = vals.get('list_price', 0.0)
+                        values['list_price'] = vals.get('list_price')
 
                     if values:
                         return move_line.write(values)

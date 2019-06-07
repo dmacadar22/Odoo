@@ -13,13 +13,15 @@ class StockPicking(models.Model):
         'cancel': [('readonly', True)],
     }, readonly=False)
 
-    partial_amount_total = fields.Float(string="Invoice Partial Total", digits=dp.get_precision('Product Price'), compute="compute_partial_amount")
+    partial_amount_total = fields.Float(string="Invoice Partial Total", digits=dp.get_precision('Product Price'),
+                                        compute="compute_partial_amount")
 
-    freight_charges = fields.Float(string="Freight Charges", digits=dp.get_precision('Product Price'),)
+    freight_charges = fields.Float(string="Freight Charges", digits=dp.get_precision('Product Price'), )
     distribute_freight = fields.Boolean(string="Distribute Freight?")
-    miscellaneous_charges = fields.Float(string="Miscellaneous Charges", digits=dp.get_precision('Product Price'),)
-    discount = fields.Float(string="Discounts", digits=dp.get_precision('Product Price'),)
-    tax = fields.Float(string="Taxes", digits=dp.get_precision('Product Price'),)
+    miscellaneous_charges = fields.Float(string="Miscellaneous Charges", digits=dp.get_precision('Product Price'), )
+    discount = fields.Float(string="Discounts", digits=dp.get_precision('Product Price'), )
+    tax = fields.Float(string="Taxes", digits=dp.get_precision('Product Price'), )
+    is_converted = fields.Boolean(default=False)
 
     @api.onchange('miscellaneous_charges')
     def onchange_miscellaneous_charges(self):
@@ -127,6 +129,58 @@ class StockPicking(models.Model):
             'amount_total',
             'partial_amount_total'
         ]
+
+    @api.multi
+    def do_purchase_order(self):
+        """
+        PO Selection state - purchase
+        PO m2o partner_id
+        PO Datetime date_order
+        PO Datetime date_planned
+        PO Date date_approve
+        PO m2o currency_id
+        PO m2o company_id
+        PO m2o user_id
+        PO selection invoice_status to_invoice
+        PO m2o picking_type_id
+        PO o2m order_line
+        """
+
+        for record in self:
+            if record.partner_id:
+                # order_lines = []
+                order_vals = {
+                    'partner_id': record.partner_id.id,
+                    'company_id': record.company_id.id,
+                    'state': 'purchase',
+                    'user_id': self.env.user.id,
+                    'invoice_status': 'to invoice',
+                    'date_order': record.date,
+                    'date_planned': record.date,
+                    'date_approve': record.date,
+                    # 'order_line': order_lines,
+                    'picking_type_id': record.picking_type_id.id
+                }
+
+                order_id = self.env['purchase.order'].with_context({'stock_barcode_ext': True}).create(order_vals)
+
+                for move_line in record.move_line_ids:
+                    product = move_line.product_id
+
+                    order_line_vals = {
+                        'order_id': order_id.id,
+                        'product_id': product.id,
+                        'name': product.name,
+                        'product_uom': product.uom_id.id,
+                        'date_planned': move_line.date,
+                        'price_unit': product.standard_price,
+                        'product_qty': move_line.qty_done,
+                        'qty_received': move_line.qty_done,
+                    }
+                    order_line = self.env['purchase.order.line'].with_context({'stock_barcode_ext': True}).create(
+                        order_line_vals)
+                    move_line.move_id.purchase_line_id = order_line.id
+                record.is_converted = True
 
     # @api.multi
     # def button_validate(self):

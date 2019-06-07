@@ -20,12 +20,15 @@
                 <xpath expr="//div[@name='button_box']" position="inside">
                     <button name="open_action_receive" string="Go to receive" type="object"
                             class="oe_stat_button" icon="fa-truck"/>
+                    <button name="do_purchase_order" string="Do Purchase" type="object"
+                            class="oe_stat_button" icon="fa-shopping-cart" attrs="{'invisible': ['|', ('is_converted', '=', True),('state', 'in', ('draft','confirmed','assigned','waiting'))]}"/>
                 </xpath>
 
                 <xpath expr="//group[1]" position="after">
                     <separator string="Receiving Information"/>
                     <group>
                         <group>
+                            <field name="is_converted" invisible="1"/>
                             <field name="amount_total"/>
                             <field name="distribute_freight"/>
                             <field name="discount"/>
