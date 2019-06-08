@@ -30,6 +30,46 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
             this.list_price = -1;
         },
 
+        /**
+         * Removes the highlight on the lines.
+         */
+        clearLineHighlight: function () {
+            var $body = this.$el.filter('.o_barcode_lines');
+            // Remove the highlight from the other line.
+            $body.find('.o_highlight').removeClass('o_highlight');
+        },
+
+        _highlightLine: function ($line, doNotClearLineHighlight) {
+            var $body = this.$el.filter('.o_barcode_lines');
+            if (!doNotClearLineHighlight) {
+                this.clearLineHighlight();
+            }
+            // Highlight `$line`.
+            $line.toggleClass('o_highlight', true);
+            $line.parents('.o_barcode_lines').toggleClass('o_js_has_highlight', true);
+
+            var isReservationProcessed;
+            if ($line.find('.o_barcode_scanner_qty').text().indexOf('/') === -1) {
+                isReservationProcessed = false;
+            } else {
+                isReservationProcessed = this._isReservationProcessedLine($line);
+            }
+            if (isReservationProcessed === 1) {
+                $line.toggleClass('o_highlight_green', false);
+                $line.toggleClass('o_highlight_red', true);
+            } else {
+                $line.toggleClass('o_highlight_green', true);
+                $line.toggleClass('o_highlight_red', false);
+            }
+
+            // Scroll to `$line`.
+            $body.animate({
+                scrollTop: $body.scrollTop() + $line.position().top - $body.height() / 2 + $line.height() / 2
+            }, 500);
+
+        },
+
+
         _onBarcodeScanned: function (barcode) {
             var self = this;
             return this.stepsByName[this.currentStep || 'source'](barcode, []).then(function (res) {
@@ -58,7 +98,6 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
                         expectedLocationDestId = self.scanned_location_dest &&
                             self.scanned_location_dest.id ||
                             self.currentState.location_dest_id.id;
-                        // self._reloadLineWidget(self.currentPageIndex);
                     }
 
                     if (expectedLocationId !== currentPage.location_id ||
@@ -73,7 +112,6 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
                         def = self._save(params).then(function () {
                             self._reloadLineWidget(self.currentPageIndex);
                         });
-
                     }
                 }
 
@@ -81,18 +119,34 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
                 if (self.scannedLines && self.scanned_location_dest) {
                     self._endBarcodeFlow();
                 }
+
                 var linesActions = res.linesActions;
+
                 def.always(function () {
                     _.each(linesActions, function (action) {
                         action[0].apply(self.linesWidget, action[1]);
-                        // self._reloadLineWidget(self.currentPageIndex);
                     });
+
                     self._save().then(function () {
                         self._reloadLineWidget(self.currentPageIndex);
                     });
 
+                    setTimeout(function () {
+                        var $body = self.$el.find('.o_barcode_lines');
+                        var $line = self.$('.o_barcode_line:contains(' + barcode + ')');
+                        self._highlightLine($line);
+
+                        // Scroll to `$line`.
+                        $body.animate({
+                            scrollTop: $body.scrollTop() + $line.position().top - $body.height() / 2 + $line.height() / 2
+                        }, 500);
+
+                    }, 1000);
+
+
                     return $.when();
                 });
+
                 return def;
             }, function (errorMessage) {
                 self.do_warn(_t('Warning'), errorMessage);
