@@ -31,6 +31,21 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
         },
 
         /**
+         *
+         */
+        _isReservationProcessedLine: function ($line) {
+            var qties = $line.find('.o_barcode_scanner_qty').text();
+            qties = qties.split('/');
+            if (parseInt(qties[0], 10) < parseInt(qties[1], 10)) {
+                return -1;
+            } else if (parseInt(qties[0], 10) === parseInt(qties[1], 10)) {
+                return 0;
+            } else {
+                return 1;
+            }
+        },
+
+        /**
          * Removes the highlight on the lines.
          */
         clearLineHighlight: function () {
@@ -39,6 +54,9 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
             $body.find('.o_highlight').removeClass('o_highlight');
         },
 
+        /**
+         * Highlight on the lines
+         */
         _highlightLine: function ($line, doNotClearLineHighlight) {
             var $body = this.$el.filter('.o_barcode_lines');
             if (!doNotClearLineHighlight) {
@@ -143,7 +161,6 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
 
                     }, 1000);
 
-
                     return $.when();
                 });
 
@@ -174,6 +191,8 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
             current.data('qty_done', current.val());
             console.log($(ev.currentTarget).val());
             self._onClickSaveLine(ev);
+
+
         },
 
         _onTotal: function (ev) {
@@ -197,11 +216,24 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
                     }).then(function (res) {
                         var def = $.when();
                         return def.then(function () {
-                            return self.trigger_up('reload');
+                            self.trigger_up('reload');
+                            setTimeout(function () {
+                                var $body = self.$el.find('.o_barcode_lines');
+                                var id = $(ev.target).parents('.o_barcode_line').data('id');
+                                var $line = self.$("[data-id='" + id + "']");
+                                self._highlightLine($line);
+
+                                // Scroll to `$line`.
+                                $body.animate({
+                                    scrollTop: $body.scrollTop() + $line.position().top - $body.height() / 2 + $line.height() / 2
+                                }, 500);
+
+                            }, 1000);
                         });
                     });
                 });
             });
+
         },
 
         _onReload: function (ev) {
@@ -214,10 +246,8 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
 
         _onClickSaveLine: function (ev) {
             var self = this;
-
             var id = $(ev.target).parents('.o_barcode_line').data('id');
             var parent = $(ev.target).parent('.o_barcode_line');
-
 
             var price_subtotal = parent.find('oe_price_subtotal').data('price_subtotal');
             var qty_done = parent.find('oe_qty_done').data('qty_done');
@@ -243,7 +273,20 @@ odoo.define('stock_barcode_ext.picking_client_action', function (require) {
                     }).then(function (res) {
                         var def = $.when();
                         return def.then(function () {
-                            return self.trigger_up('reload');
+                            self.trigger_up('reload');
+
+                            setTimeout(function () {
+                                var $body = self.$el.find('.o_barcode_lines');
+                                var id = $(ev.target).parents('.o_barcode_line').data('id');
+                                var $line = self.$("[data-id='" + id + "']");
+                                self._highlightLine($line);
+
+                                // Scroll to `$line`.
+                                $body.animate({
+                                    scrollTop: $body.scrollTop() + $line.position().top - $body.height() / 2 + $line.height() / 2
+                                }, 500);
+
+                            }, 1000);
                         });
                     });
                 });
