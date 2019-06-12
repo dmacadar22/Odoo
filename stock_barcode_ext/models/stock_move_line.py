@@ -134,6 +134,7 @@ class StockMoveLineExt(models.Model):
 
     @api.model
     def write_rpc(self, vals):
+        print('write rpc', vals)
         if 'id' in vals:
             vid = vals.get('id')
             if type(vid) != str:
@@ -154,6 +155,7 @@ class StockMoveLineExt(models.Model):
 
     @api.multi
     def write(self, vals):
+        print('write ', vals)
         res = super(StockMoveLineExt, self).write(vals)
         for record in self:
             # if 'product_id' in vals:
@@ -165,8 +167,8 @@ class StockMoveLineExt(models.Model):
             if 'list_price' in vals:
                 record.product_id.write({'list_price': vals.get('list_price')})
 
-            # if 'standard_price' in vals:
-            #     record.price_subtotal = record.qty_done * record.standard_price
+            if 'standard_price' in vals:
+                record.product_id.write({'standard_price': record.standard_price})
 
             if 'qty_done' in vals:
                 if record.qty_done != 0.0:

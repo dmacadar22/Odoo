@@ -179,20 +179,34 @@ class StockPicking(models.Model):
                     }
                     order_line = self.env['purchase.order.line'].with_context({'stock_barcode_ext': True}).create(
                         order_line_vals)
-                    move_line.move_id.purchase_line_id = order_line.id
+                    move_line.move_id.purchase_line_id.write({'order_line': order_line.id})
                 record.is_converted = True
 
-    # @api.multi
-    # def button_validate(self):
-    #     if not self._context:
-    #         if self.move_line_ids:
-    #             total = sum([move_line.price_subtotal for move_line in self.move_line_ids])
-    #             if self.amount_total != total:
-    #                 raise UserError(_('Error. The amounts are different. Invoice amount {} - Receiving amount {}'.format(
-    #                     self.amount_total, total)))
-    #
-    #     res = super(StockPicking, self).button_validate()
-    #     return res
+    @api.multi
+    def button_validate(self):
+        self.ensure_one()
+
+        if not self._context:
+            if self.move_line_ids:
+                purchase_lines = self.move_line_ids.mapped('move_id.purchase_line_id')
+                if purchase_lines:
+                    self.is_converted = True
+                    for move_line in self.move_line_ids:
+                        purchase_line = move_line.move_id.purchase_line_id
+                        if purchase_line.exists():
+                            order_id = purchase_line.order_id
+                            if order_id.state == 'purchase':
+                                purchase_line.write({'price_unit': move_line.product_id.standard_price})
+                else:
+                    self.do_purchase_order()
+
+        #         total = sum([move_line.price_subtotal for move_line in self.move_line_ids])
+        #         if self.amount_total != total:
+        #             raise UserError(_('Error. The amounts are different. Invoice amount {} - Receiving amount {}'.format(
+        #                 self.amount_total, total)))
+
+        res = super(StockPicking, self).button_validate()
+        return res
 
     def open_action_receive(self):
         self.ensure_one()
