@@ -221,8 +221,8 @@ class StockPicking(models.Model):
         #             raise UserError(_('Error. The amounts are different. Invoice amount {} - Receiving amount {}'.format(
         #                 self.amount_total, total)))
 
-        # res = super(StockPicking, self).button_validate()
-        return False
+        res = super(StockPicking, self).button_validate()
+        return res
 
     def open_action_receive(self):
         self.ensure_one()
