@@ -186,10 +186,13 @@ class StockPicking(models.Model):
                     lines = self.env['purchase.order.line'].search([('state', 'in', ('purchase', 'done'))]).filtered(
                         lambda r: r.product_id.id == product.id)
 
-                    sum_costs = sum([line.price_unit for line in lines])
-                    sum_qty = sum([line.product_qty for line in lines])
-                    if product.purchased_product_qty:
-                        product.write({'standard_price': round(sum_costs / sum_qty, 2)})
+                    actual_cost = sum([line.price_unit * line.product_qty for line in lines])
+                    qty_available = sum([line.product_qty for line in lines])
+                    print(actual_cost)
+                    print(qty_available)
+                    if qty_available:
+                        cost = actual_cost / qty_available
+                        product.write({'standard_price': round(cost, 2)})
 
                 record.is_converted = True
                 record.origin = order_id.name
@@ -213,10 +216,16 @@ class StockPicking(models.Model):
                         product = purchase_line.product_id
                         lines = self.env['purchase.order.line'].search(
                             [('state', 'in', ('purchase', 'done'))]).filtered(lambda r: r.product_id.id == product.id)
-                        sum_costs = sum([line.price_unit for line in lines])
-                        sum_qty = sum([line.product_qty for line in lines])
-                        if product.purchased_product_qty:
-                            product.write({'standard_price': round(sum_costs / sum_qty, 2)})
+
+                        actual_cost = sum([line.price_unit * line.product_qty for line in lines])
+                        qty_available = sum([line.product_qty for line in lines])
+
+                        print(actual_cost)
+                        print(qty_available)
+                        print(actual_cost/qty_available)
+                        if qty_available:
+                            cost = actual_cost / qty_available
+                            product.write({'standard_price': round(cost, 2)})
 
                 else:
                     self.do_purchase_order()
