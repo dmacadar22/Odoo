@@ -173,14 +173,23 @@ class StockPicking(models.Model):
                         'name': product.name,
                         'product_uom': product.uom_id.id,
                         'date_planned': move_line.date,
-                        'price_unit': product.standard_price,
+                        'price_unit': move_line.standard_price,
                         'product_qty': move_line.qty_done,
                         'qty_received': move_line.qty_done,
                     }
                     order_line = self.env['purchase.order.line'].with_context({'stock_barcode_ext': True}).create(
                         order_line_vals)
                     move_line.move_id.purchase_line_id.write({'order_line': order_line.id})
+
+                for move_line in record.move_line_ids:
+                    product = move_line.product_id
+                    lines = self.env['purchase.order.line'].search([('state', 'in', ('purchase','done'))]).filtered(lambda r: r.product_id.id == product.id)
+                    costs = sum([line.price_unit for line in lines])
+                    if product.purchased_product_qty:
+                        product.write({'standard_price': round(costs / product.purchased_product_qty, 2)})
+
                 record.is_converted = True
+                record.origin = order_id.name
 
     @api.multi
     def button_validate(self):
@@ -196,7 +205,14 @@ class StockPicking(models.Model):
                         if purchase_line.exists():
                             order_id = purchase_line.order_id
                             if order_id.state == 'purchase':
-                                purchase_line.write({'price_unit': move_line.product_id.standard_price})
+                                purchase_line.write({'price_unit': move_line.standard_price})
+
+                        product = purchase_line.product_id
+                        lines = self.env['purchase.order.line'].search([('state', 'in', ('purchase','done'))]).filtered(lambda r: r.product_id.id == product.id)
+                        costs = sum([line.price_unit for line in lines])
+                        if product.purchased_product_qty:
+                            product.write({'standard_price': round(costs / product.purchased_product_qty, 2)})
+
                 else:
                     self.do_purchase_order()
 
@@ -205,8 +221,8 @@ class StockPicking(models.Model):
         #             raise UserError(_('Error. The amounts are different. Invoice amount {} - Receiving amount {}'.format(
         #                 self.amount_total, total)))
 
-        res = super(StockPicking, self).button_validate()
-        return res
+        # res = super(StockPicking, self).button_validate()
+        return False
 
     def open_action_receive(self):
         self.ensure_one()
