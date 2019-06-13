@@ -183,10 +183,13 @@ class StockPicking(models.Model):
 
                 for move_line in record.move_line_ids:
                     product = move_line.product_id
-                    lines = self.env['purchase.order.line'].search([('state', 'in', ('purchase','done'))]).filtered(lambda r: r.product_id.id == product.id)
-                    costs = sum([line.price_unit for line in lines])
+                    lines = self.env['purchase.order.line'].search([('state', 'in', ('purchase', 'done'))]).filtered(
+                        lambda r: r.product_id.id == product.id)
+
+                    sum_costs = sum([line.price_unit for line in lines])
+                    sum_qty = sum([line.product_qty for line in lines])
                     if product.purchased_product_qty:
-                        product.write({'standard_price': round(costs / product.purchased_product_qty, 2)})
+                        product.write({'standard_price': round(sum_costs / sum_qty, 2)})
 
                 record.is_converted = True
                 record.origin = order_id.name
@@ -208,10 +211,12 @@ class StockPicking(models.Model):
                                 purchase_line.write({'price_unit': move_line.standard_price})
 
                         product = purchase_line.product_id
-                        lines = self.env['purchase.order.line'].search([('state', 'in', ('purchase','done'))]).filtered(lambda r: r.product_id.id == product.id)
-                        costs = sum([line.price_unit for line in lines])
+                        lines = self.env['purchase.order.line'].search(
+                            [('state', 'in', ('purchase', 'done'))]).filtered(lambda r: r.product_id.id == product.id)
+                        sum_costs = sum([line.price_unit for line in lines])
+                        sum_qty = sum([line.product_qty for line in lines])
                         if product.purchased_product_qty:
-                            product.write({'standard_price': round(costs / product.purchased_product_qty, 2)})
+                            product.write({'standard_price': round(sum_costs / sum_qty, 2)})
 
                 else:
                     self.do_purchase_order()
