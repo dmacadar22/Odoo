@@ -188,18 +188,31 @@ class StockPicking(models.Model):
 
                     actual_cost = sum([line.price_unit * line.product_qty for line in lines])
                     qty_available = sum([line.product_qty for line in lines])
-                    print(actual_cost)
-                    print(qty_available)
                     if qty_available:
                         cost = actual_cost / qty_available
                         product.write({'standard_price': round(cost, 2)})
 
+                stock_moves = record.move_line_ids.mapped('move_id')
+                print('Stock Move', stock_moves)
+                for stock_move in stock_moves:
+                    account_move = self.env['account.move'].search([('stock_move_id', '=', stock_move.id)], limit=1)
+                    print('Account move', account_move)
+                    account_move.write({'state': 'draft'})
+                    amount = sum([line.qty_done * line.standard_price for line in stock_move.move_line_ids])
+
+                    for line in account_move.line_ids:
+                        if line.balance < 0:
+                            self._cr.execute("UPDATE account_move_line SET credit ={},balance={},credit_cash_basis={},balance_cash_basis={} WHERE id={}".format(amount, -amount, amount, -amount, line.id))
+                        else:
+                            self._cr.execute("UPDATE account_move_line SET debit ={},balance={},debit_cash_basis={},balance_cash_basis={} WHERE id={}".format(amount, amount, amount, amount, line.id))
+
+                    account_move.write({'state': 'posted'})
                 record.is_converted = True
                 record.origin = order_id.name
 
     @api.multi
     def button_validate(self):
-        self.ensure_one()
+        res = super(StockPicking, self).button_validate()
 
         if not self._context:
             if self.move_line_ids:
@@ -220,12 +233,27 @@ class StockPicking(models.Model):
                         actual_cost = sum([line.price_unit * line.product_qty for line in lines])
                         qty_available = sum([line.product_qty for line in lines])
 
-                        print(actual_cost)
-                        print(qty_available)
-                        print(actual_cost/qty_available)
                         if qty_available:
                             cost = actual_cost / qty_available
                             product.write({'standard_price': round(cost, 2)})
+
+                    stock_moves = self.move_line_ids.mapped('move_id')
+                    for stock_move in stock_moves:
+                        account_move = self.env['account.move'].search([('stock_move_id', '=', stock_move.id)], limit=1)
+                        account_move.write({'state': 'draft'})
+                        amount = sum([line.qty_done * line.standard_price for line in stock_move.move_line_ids])
+
+                        for line in account_move.line_ids:
+                            if line.balance < 0:
+                                self._cr.execute(
+                                    "UPDATE account_move_line SET credit ={},balance={},credit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
+                                        amount, -amount, amount, -amount, line.id))
+                            else:
+                                self._cr.execute(
+                                    "UPDATE account_move_line SET debit ={},balance={},debit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
+                                        amount, amount, amount, amount, line.id))
+
+                        account_move.write({'state': 'posted'})
 
                 else:
                     self.do_purchase_order()
@@ -235,7 +263,6 @@ class StockPicking(models.Model):
         #             raise UserError(_('Error. The amounts are different. Invoice amount {} - Receiving amount {}'.format(
         #                 self.amount_total, total)))
 
-        res = super(StockPicking, self).button_validate()
         return res
 
     def open_action_receive(self):

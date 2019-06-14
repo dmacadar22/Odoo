@@ -134,7 +134,6 @@ class StockMoveLineExt(models.Model):
 
     @api.model
     def write_rpc(self, vals):
-        print('write rpc', vals)
         if 'id' in vals:
             vid = vals.get('id')
             if type(vid) != str:
@@ -155,7 +154,6 @@ class StockMoveLineExt(models.Model):
 
     @api.multi
     def write(self, vals):
-        print('write ', vals)
         res = super(StockMoveLineExt, self).write(vals)
         for record in self:
             # if 'product_id' in vals:

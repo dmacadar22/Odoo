@@ -20,7 +20,6 @@ class PurchaseOrderLine(models.Model):
     def create(self, values):
         line = models.Model.create(self, values)
         # line = super(PurchaseOrderLine, self).create(values)
-        print('barcode ', self._context)
         if line.order_id.state == 'purchase' and not self._context.get('stock_barcode_ext', False):
             line._create_or_update_picking()
         return line
