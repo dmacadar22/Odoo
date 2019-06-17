@@ -179,32 +179,37 @@ class StockPicking(models.Model):
                     }
                     order_line = self.env['purchase.order.line'].with_context({'stock_barcode_ext': True}).create(
                         order_line_vals)
+
+                    move_line.move_id.write({'price_unit': move_line.standard_price})
                     move_line.move_id.purchase_line_id.write({'order_line': order_line.id})
 
                 for move_line in record.move_line_ids:
                     product = move_line.product_id
-                    lines = self.env['purchase.order.line'].search([('state', 'in', ('purchase', 'done'))]).filtered(
+
+                    moves = self.env['stock.move'].search([('state', '=', 'done')]).filtered(
                         lambda r: r.product_id.id == product.id)
 
-                    actual_cost = sum([line.price_unit * line.product_qty for line in lines])
-                    qty_available = sum([line.product_qty for line in lines])
+                    actual_cost = sum([abs(move.price_unit) * move.product_qty for move in moves])
+                    qty_available = sum([move.product_qty for move in moves])
                     if qty_available:
                         cost = actual_cost / qty_available
                         product.write({'standard_price': round(cost, 2)})
 
                 stock_moves = record.move_line_ids.mapped('move_id')
-                print('Stock Move', stock_moves)
                 for stock_move in stock_moves:
                     account_move = self.env['account.move'].search([('stock_move_id', '=', stock_move.id)], limit=1)
-                    print('Account move', account_move)
                     account_move.write({'state': 'draft'})
                     amount = sum([line.qty_done * line.standard_price for line in stock_move.move_line_ids])
 
                     for line in account_move.line_ids:
                         if line.balance < 0:
-                            self._cr.execute("UPDATE account_move_line SET credit ={},balance={},credit_cash_basis={},balance_cash_basis={} WHERE id={}".format(amount, -amount, amount, -amount, line.id))
+                            self._cr.execute(
+                                "UPDATE account_move_line SET credit ={},balance={},credit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
+                                    amount, -amount, amount, -amount, line.id))
                         else:
-                            self._cr.execute("UPDATE account_move_line SET debit ={},balance={},debit_cash_basis={},balance_cash_basis={} WHERE id={}".format(amount, amount, amount, amount, line.id))
+                            self._cr.execute(
+                                "UPDATE account_move_line SET debit ={},balance={},debit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
+                                    amount, amount, amount, amount, line.id))
 
                     account_move.write({'state': 'posted'})
                 record.is_converted = True
@@ -225,14 +230,15 @@ class StockPicking(models.Model):
                             order_id = purchase_line.order_id
                             if order_id.state == 'purchase':
                                 purchase_line.write({'price_unit': move_line.standard_price})
+                                move_line.move_id.write({'price_unit': move_line.standard_price})
 
                         product = purchase_line.product_id
-                        lines = self.env['purchase.order.line'].search(
-                            [('state', 'in', ('purchase', 'done'))]).filtered(lambda r: r.product_id.id == product.id)
 
-                        actual_cost = sum([line.price_unit * line.product_qty for line in lines])
-                        qty_available = sum([line.product_qty for line in lines])
+                        moves = self.env['stock.move'].search([('state', '=', 'done')]).filtered(
+                            lambda r: r.product_id.id == product.id)
 
+                        actual_cost = sum([abs(move.price_unit) * move.product_qty for move in moves])
+                        qty_available = sum([move.product_qty for move in moves])
                         if qty_available:
                             cost = actual_cost / qty_available
                             product.write({'standard_price': round(cost, 2)})
