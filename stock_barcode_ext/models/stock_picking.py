@@ -183,9 +183,9 @@ class StockPicking(models.Model):
                     move_line.move_id.purchase_line_id.write({'order_line': order_line.id, 'state': 'purchase',})
 
                     StockMove = self.env['stock.move']
-                    domain = [('product_id', '=', product.id)] + StockMove._get_all_base_domain()
+                    domain = [('product_id', '=', product.id), ('state', '=', 'done')]
                     moves = StockMove.search(domain)
-                    valuation = sum([abs(move.price_unit) * move.product_qty for move in moves])
+                    valuation = sum([move.price_unit * move.product_qty for move in moves])
                     qty_available = product.qty_available
 
                     qty_hand = (product.qty_available - move_line.qty_done)
@@ -197,8 +197,9 @@ class StockPicking(models.Model):
                     if abs(qty_hand) == move_line.qty_done:
                         qty_hand = 0
 
+                    cost_avg = ((qty_hand * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (qty_hand + move_line.qty_done)
                     cost = ((( qty_hand * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (product.qty_available + move_line.qty_done))
-                    print('cost ', cost)
+                    print('cost ', cost, 'cost avg ', cost_avg)
 
                     
                     # print(correction_value, 'list ')
