@@ -152,7 +152,6 @@ class StockPicking(models.Model):
                 order_vals = {
                     'partner_id': record.partner_id.id,
                     'company_id': record.company_id.id,
-                    'state': 'purchase',
                     'user_id': self.env.user.id,
                     'invoice_status': 'to invoice',
                     'date_order': record.date,
@@ -181,14 +180,30 @@ class StockPicking(models.Model):
                         order_line_vals)
 
                     move_line.move_id.write({'price_unit': move_line.standard_price})
-                    move_line.move_id.purchase_line_id.write({'order_line': order_line.id})
+                    move_line.move_id.purchase_line_id.write({'order_line': order_line.id, 'state': 'purchase',})
 
-                for move_line in record.move_line_ids:
-                    product = move_line.product_id
-                    print('Product ', product.name)
-
-                    valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
+                    StockMove = self.env['stock.move']
+                    domain = [('product_id', '=', product.id)] + StockMove._get_all_base_domain()
+                    moves = StockMove.search(domain)
+                    valuation = sum([abs(move.price_unit) * move.product_qty for move in moves])
                     qty_available = product.qty_available
+
+                    qty_hand = (product.qty_available - move_line.qty_done)
+                    print('prod', product.qty_available)
+                    print('prod', product.standard_price)
+                    print('mv', move_line.qty_done)
+                    print('mv', move_line.standard_price)
+                    
+                    if abs(qty_hand) == move_line.qty_done:
+                        qty_hand = 0
+
+                    cost = ((( qty_hand * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (product.qty_available + move_line.qty_done))
+                    print('cost ', cost)
+
+                    
+                    # print(correction_value, 'list ')
+                    # valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
+                    # qty_available = product.qty_available
 
                     print('valuation product ', valuation)
                     print('qty_available ', qty_available)
@@ -197,6 +212,7 @@ class StockPicking(models.Model):
                         cost = valuation / qty_available
                         print('division cost', cost)
                         product.write({'standard_price': round(cost, 2)})
+
 
                 stock_moves = record.move_line_ids.mapped('move_id')
                 for stock_move in stock_moves:
@@ -220,14 +236,13 @@ class StockPicking(models.Model):
 
     @api.multi
     def button_validate(self):
-        print('entro')
         res = super(StockPicking, self).button_validate()
-        print('entro de nuevo')
         if not self._context:
-            print('entro de por el context nuevo')
+
             if self.move_line_ids:
                 purchase_lines = self.move_line_ids.mapped('move_id.purchase_line_id')
                 if purchase_lines:
+                    print('entro de por el context nuevo')
                     self.is_converted = True
                     for move_line in self.move_line_ids:
                         purchase_line = move_line.move_id.purchase_line_id
@@ -237,39 +252,39 @@ class StockPicking(models.Model):
                                 purchase_line.write({'price_unit': move_line.standard_price})
                                 move_line.move_id.write({'price_unit': move_line.standard_price})
 
-                for move_line in self.move_line_ids:
-                    product = move_line.product_id
-                    print('Product ', product.name)
+                    for move_line in self.move_line_ids:
+                        product = move_line.product_id
+                        print('Product ', product.name)
 
-                    valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
-                    qty_available = product.qty_available
+                        valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
+                        qty_available = product.qty_available
 
-                    print('valuation product ', valuation)
-                    print('qty_available ', qty_available)
-                    
-                    if qty_available:
-                        cost = valuation / qty_available
-                        print('division cost', cost)
-                        product.write({'standard_price': round(cost, 2)})
+                        print('valuation product ', valuation)
+                        print('qty_available ', qty_available)
+                        
+                        if qty_available:
+                            cost = valuation / qty_available
+                            print('division cost', cost)
+                            product.write({'standard_price': round(cost, 2)})
 
 
-                stock_moves = self.move_line_ids.mapped('move_id')
-                for stock_move in stock_moves:
-                    account_move = self.env['account.move'].search([('stock_move_id', '=', stock_move.id)], limit=1)
-                    account_move.write({'state': 'draft'})
-                    amount = sum([line.qty_done * line.standard_price for line in stock_move.move_line_ids])
+                    stock_moves = self.move_line_ids.mapped('move_id')
+                    for stock_move in stock_moves:
+                        account_move = self.env['account.move'].search([('stock_move_id', '=', stock_move.id)], limit=1)
+                        account_move.write({'state': 'draft'})
+                        amount = sum([line.qty_done * line.standard_price for line in stock_move.move_line_ids])
 
-                    for line in account_move.line_ids:
-                        if line.balance < 0:
-                            self._cr.execute(
-                                "UPDATE account_move_line SET credit ={},balance={},credit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
-                                    amount, -amount, amount, -amount, line.id))
-                        else:
-                            self._cr.execute(
-                                "UPDATE account_move_line SET debit ={},balance={},debit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
-                                    amount, amount, amount, amount, line.id))
+                        for line in account_move.line_ids:
+                            if line.balance < 0:
+                                self._cr.execute(
+                                    "UPDATE account_move_line SET credit ={},balance={},credit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
+                                        amount, -amount, amount, -amount, line.id))
+                            else:
+                                self._cr.execute(
+                                    "UPDATE account_move_line SET debit ={},balance={},debit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
+                                        amount, amount, amount, amount, line.id))
 
-                    account_move.write({'state': 'posted'})
+                        account_move.write({'state': 'posted'})
 
                 else:
                     print('nada de xontext')
