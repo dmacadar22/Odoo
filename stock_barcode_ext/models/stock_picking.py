@@ -185,14 +185,17 @@ class StockPicking(models.Model):
 
                 for move_line in record.move_line_ids:
                     product = move_line.product_id
+                    print('Product ', product.name)
 
-                    moves = self.env['stock.move'].search([('state', '=', 'done')]).filtered(
-                        lambda r: r.product_id.id == product.id)
+                    valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
+                    qty_available = product.qty_available
 
-                    actual_cost = sum([abs(move.price_unit) * move.product_qty for move in moves])
-                    qty_available = sum([move.product_qty for move in moves])
+                    print('valuation product ', valuation)
+                    print('qty_available ', qty_available)
+                    
                     if qty_available:
-                        cost = actual_cost / qty_available
+                        cost = valuation / qty_available
+                        print('division cost', cost)
                         product.write({'standard_price': round(cost, 2)})
 
                 stock_moves = record.move_line_ids.mapped('move_id')
@@ -217,9 +220,11 @@ class StockPicking(models.Model):
 
     @api.multi
     def button_validate(self):
+        print('entro')
         res = super(StockPicking, self).button_validate()
-
+        print('entro de nuevo')
         if not self._context:
+            print('entro de por el context nuevo')
             if self.move_line_ids:
                 purchase_lines = self.move_line_ids.mapped('move_id.purchase_line_id')
                 if purchase_lines:
@@ -232,36 +237,42 @@ class StockPicking(models.Model):
                                 purchase_line.write({'price_unit': move_line.standard_price})
                                 move_line.move_id.write({'price_unit': move_line.standard_price})
 
-                        product = purchase_line.product_id
+                for move_line in self.move_line_ids:
+                    product = move_line.product_id
+                    print('Product ', product.name)
 
-                        moves = self.env['stock.move'].search([('state', '=', 'done')]).filtered(
-                            lambda r: r.product_id.id == product.id)
+                    valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
+                    qty_available = product.qty_available
 
-                        actual_cost = sum([abs(move.price_unit) * move.product_qty for move in moves])
-                        qty_available = sum([move.product_qty for move in moves])
-                        if qty_available:
-                            cost = actual_cost / qty_available
-                            product.write({'standard_price': round(cost, 2)})
+                    print('valuation product ', valuation)
+                    print('qty_available ', qty_available)
+                    
+                    if qty_available:
+                        cost = valuation / qty_available
+                        print('division cost', cost)
+                        product.write({'standard_price': round(cost, 2)})
 
-                    stock_moves = self.move_line_ids.mapped('move_id')
-                    for stock_move in stock_moves:
-                        account_move = self.env['account.move'].search([('stock_move_id', '=', stock_move.id)], limit=1)
-                        account_move.write({'state': 'draft'})
-                        amount = sum([line.qty_done * line.standard_price for line in stock_move.move_line_ids])
 
-                        for line in account_move.line_ids:
-                            if line.balance < 0:
-                                self._cr.execute(
-                                    "UPDATE account_move_line SET credit ={},balance={},credit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
-                                        amount, -amount, amount, -amount, line.id))
-                            else:
-                                self._cr.execute(
-                                    "UPDATE account_move_line SET debit ={},balance={},debit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
-                                        amount, amount, amount, amount, line.id))
+                stock_moves = self.move_line_ids.mapped('move_id')
+                for stock_move in stock_moves:
+                    account_move = self.env['account.move'].search([('stock_move_id', '=', stock_move.id)], limit=1)
+                    account_move.write({'state': 'draft'})
+                    amount = sum([line.qty_done * line.standard_price for line in stock_move.move_line_ids])
 
-                        account_move.write({'state': 'posted'})
+                    for line in account_move.line_ids:
+                        if line.balance < 0:
+                            self._cr.execute(
+                                "UPDATE account_move_line SET credit ={},balance={},credit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
+                                    amount, -amount, amount, -amount, line.id))
+                        else:
+                            self._cr.execute(
+                                "UPDATE account_move_line SET debit ={},balance={},debit_cash_basis={},balance_cash_basis={} WHERE id={}".format(
+                                    amount, amount, amount, amount, line.id))
+
+                    account_move.write({'state': 'posted'})
 
                 else:
+                    print('nada de xontext')
                     self.do_purchase_order()
 
         #         total = sum([move_line.price_subtotal for move_line in self.move_line_ids])
