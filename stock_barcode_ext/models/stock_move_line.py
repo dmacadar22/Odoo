@@ -166,7 +166,7 @@ class StockMoveLineExt(models.Model):
                 record.product_id.write({'list_price': vals.get('list_price')})
 
             # if 'standard_price' in vals:
-            #     record.price_subtotal = record.qty_done * record.standard_price
+            #     record.product_id.write({'standard_price': record.standard_price})
 
             if 'qty_done' in vals:
                 if record.qty_done != 0.0:
