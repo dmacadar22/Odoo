@@ -158,6 +158,7 @@ class StockPicking(models.Model):
                     'date_planned': record.date,
                     'date_approve': record.date,
                     # 'order_line': order_lines,
+                    'state': 'purchase',
                     'picking_type_id': record.picking_type_id.id
                 }
 
@@ -180,38 +181,16 @@ class StockPicking(models.Model):
                         order_line_vals)
 
                     move_line.move_id.write({'price_unit': move_line.standard_price})
-                    move_line.move_id.purchase_line_id.write({'order_line': order_line.id, 'state': 'purchase',})
+                    move_line.move_id.purchase_line_id.write({'order_line': order_line.id, })
 
                     StockMove = self.env['stock.move']
                     domain = [('product_id', '=', product.id), ('state', '=', 'done')]
                     moves = StockMove.search(domain)
                     valuation = sum([move.price_unit * move.product_qty for move in moves])
                     qty_available = product.qty_available
-
-                    qty_hand = (product.qty_available - move_line.qty_done)
-                    print('prod', product.qty_available)
-                    print('prod', product.standard_price)
-                    print('mv', move_line.qty_done)
-                    print('mv', move_line.standard_price)
-                    
-                    if abs(qty_hand) == move_line.qty_done:
-                        qty_hand = 0
-
-                    cost_avg = ((qty_hand * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (qty_hand + move_line.qty_done)
-                    cost = ((( qty_hand * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (product.qty_available + move_line.qty_done))
-                    print('cost ', cost, 'cost avg ', cost_avg)
-
-                    
-                    # print(correction_value, 'list ')
-                    # valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
-                    # qty_available = product.qty_available
-
-                    print('valuation product ', valuation)
-                    print('qty_available ', qty_available)
                     
                     if qty_available:
                         cost = valuation / qty_available
-                        print('division cost', cost)
                         product.write({'standard_price': round(cost, 2)})
 
 
@@ -232,6 +211,7 @@ class StockPicking(models.Model):
                                     amount, amount, amount, amount, line.id))
 
                     account_move.write({'state': 'posted'})
+
                 record.is_converted = True
                 record.origin = order_id.name
 
@@ -243,7 +223,6 @@ class StockPicking(models.Model):
             if self.move_line_ids:
                 purchase_lines = self.move_line_ids.mapped('move_id.purchase_line_id')
                 if purchase_lines:
-                    print('entro de por el context nuevo')
                     self.is_converted = True
                     for move_line in self.move_line_ids:
                         purchase_line = move_line.move_id.purchase_line_id
@@ -255,17 +234,12 @@ class StockPicking(models.Model):
 
                     for move_line in self.move_line_ids:
                         product = move_line.product_id
-                        print('Product ', product.name)
 
                         valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
                         qty_available = product.qty_available
 
-                        print('valuation product ', valuation)
-                        print('qty_available ', qty_available)
-                        
                         if qty_available:
                             cost = valuation / qty_available
-                            print('division cost', cost)
                             product.write({'standard_price': round(cost, 2)})
 
 
@@ -288,13 +262,7 @@ class StockPicking(models.Model):
                         account_move.write({'state': 'posted'})
 
                 else:
-                    print('nada de xontext')
                     self.do_purchase_order()
-
-        #         total = sum([move_line.price_subtotal for move_line in self.move_line_ids])
-        #         if self.amount_total != total:
-        #             raise UserError(_('Error. The amounts are different. Invoice amount {} - Receiving amount {}'.format(
-        #                 self.amount_total, total)))
 
         return res
 
