@@ -183,14 +183,22 @@ class StockPicking(models.Model):
                     move_line.move_id.write({'price_unit': move_line.standard_price})
                     move_line.move_id.purchase_line_id.write({'order_line': order_line.id, })
 
-                    StockMove = self.env['stock.move']
-                    domain = [('product_id', '=', product.id), ('state', '=', 'done')]
-                    moves = StockMove.search(domain)
-                    valuation = sum([move.price_unit * move.product_qty for move in moves])
+                    # StockMove = self.env['stock.move']
+                    # domain = [('product_id', '=', product.id), ('state', '=', 'done')]
+                    # moves = StockMove.search(domain)
+                    # valuation = sum([move.price_unit * move.product_qty for move in moves])
                     qty_available = product.qty_available
-                    
+
+                    # print('all qty ', qty_available,)
+                    # print('product standard_price', product.standard_price)
+                    # print('move qty', move_line.qty_done)
+                    # print('move standard_price', move_line.standard_price)
+
+                    product_qty = qty_available - move_line.qty_done
+                    # print(product_qty)
                     if qty_available:
-                        cost = valuation / qty_available
+                        cost = ((product_qty * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (qty_available)  
+                        # cost = valuation / qty_available
                         product.write({'standard_price': round(cost, 2)})
 
 
@@ -235,11 +243,12 @@ class StockPicking(models.Model):
                     for move_line in self.move_line_ids:
                         product = move_line.product_id
 
-                        valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
+                        # valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
                         qty_available = product.qty_available
 
+                        product_qty = qty_available - move_line.qty_done
                         if qty_available:
-                            cost = valuation / qty_available
+                            cost = ((product_qty * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (qty_available) 
                             product.write({'standard_price': round(cost, 2)})
 
 
