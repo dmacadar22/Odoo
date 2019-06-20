@@ -194,12 +194,16 @@ class StockPicking(models.Model):
                     # print('move qty', move_line.qty_done)
                     # print('move standard_price', move_line.standard_price)
 
-                    product_qty = qty_available - move_line.qty_done
+                    product_qty = abs(qty_available - move_line.qty_done)
                     # print(product_qty)
                     if qty_available:
                         cost = ((product_qty * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (qty_available)  
                         # cost = valuation / qty_available
                         product.write({'standard_price': round(cost, 2)})
+                    else:
+                        if product_qty:
+                            cost = ((qty_available * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (product_qty)
+                            product.write({'standard_price': round(cost, 2)})
 
 
                 stock_moves = record.move_line_ids.mapped('move_id')
@@ -242,14 +246,19 @@ class StockPicking(models.Model):
 
                     for move_line in self.move_line_ids:
                         product = move_line.product_id
-
-                        # valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
                         qty_available = product.qty_available
 
-                        product_qty = qty_available - move_line.qty_done
+                        # valuation = sum([variant._sum_remaining_values()[0] for variant in product.product_variant_ids])
+                        product_qty = abs(qty_available - move_line.qty_done)
+                        # print(product_qty)
                         if qty_available:
-                            cost = ((product_qty * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (qty_available) 
+                            cost = ((product_qty * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (qty_available)  
+                            # cost = valuation / qty_available
                             product.write({'standard_price': round(cost, 2)})
+                        else:
+                            if product_qty:
+                                cost = ((qty_available * product.standard_price) + (move_line.qty_done * move_line.standard_price)) / (product_qty)
+                                product.write({'standard_price': round(cost, 2)})
 
 
                     stock_moves = self.move_line_ids.mapped('move_id')

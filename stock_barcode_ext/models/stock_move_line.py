@@ -121,11 +121,11 @@ class StockMoveLineExt(models.Model):
                 #             'standard_price': vals.get('price_subtotal') / vals.get('qty_done')
                 #         })
 
-                if 'price_subtotal' in vals:
-                    if vals.get('qty_done', 0) != 0.0 and vals.get('price_subtotal', 0) != 0:
-                        product.write({
-                            'standard_price': vals.get('price_subtotal', 0) / vals.get('qty_done')
-                        })
+                # if 'price_subtotal' in vals:
+                #     if vals.get('qty_done', 0) != 0.0 and vals.get('price_subtotal', 0) != 0:
+                #         product.write({
+                #             'standard_price': vals.get('price_subtotal', 0) / vals.get('qty_done')
+                #         })
 
                 if 'description' in vals:
                     product.write({'description': vals.get('description')})
