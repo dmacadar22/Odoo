@@ -5,7 +5,7 @@
         <t t-jquery=".o_barcode_lines" t-operation="after">
             <div class="d-flex flex-column justify-content-right align-items-right bg-100">
                 <span class="d-inline-block text-right mr-3"><strong>Total Invoice: </strong>
-                    <i class="fa fa-dollar"/> <t t-esc='widget.partial_amount_total'/> / <i class="fa fa-dollar"/> <t t-esc="widget.amount_total"/>
+                    <i class="fa fa-dollar"/> <span class="oe_partial_amount_total" t-esc='widget.partial_amount_total'/> / <i class="fa fa-dollar"/> <span t-esc="widget.amount_total"/>
                 </span>
             </div>
         </t>
@@ -16,13 +16,13 @@
 
             <div class="d-inline-block pb-2">
                 <i class="fa fa-fw fa-barcode"/>
-                <span class="price-subtotal d-inline-block text-left">
+                <span class="product_barcode d-inline-block text-left">
                     <t t-esc="line.product_barcode"/>
                 </span>
             </div>
             <div class="d-inline-block pb-2 ml-3">
                 <i class="fa fa-fw fa-percent"/>
-                <span class="price-subtotal d-inline-block text-left">
+                <span class="oe_profit_margin d-inline-block text-left">
                     <t t-esc='line.profit_margin'/>
                 </span>
             </div>
@@ -50,7 +50,7 @@
             </div>
             <div class="d-inline-block">
                 <i class="fa fa-fw fa-dollar"/>
-                <span class="price-subtotal d-inline-block text-left">Cost
+                <span class="oe_standard_price d-inline-block text-left">Cost
                     <t t-esc='line.standard_price'/>
                 </span>
             </div>
