@@ -11,6 +11,9 @@ class StockMoveLineExt(models.Model):
     amount_total = fields.Float(related="picking_id.amount_total", string="Invoice Total",
                                 digits=(16, 2), )
 
+    partial_amount_total = fields.Float(related="picking_id.partial_amount_total", string="Invoice Partial Total",
+                                digits=(16, 2), )
+
     description = fields.Text(
         'Product Description',
         related="product_id.description",
@@ -35,7 +38,7 @@ class StockMoveLineExt(models.Model):
         string='Cost',
         digits=(16, 2),
         help="Cost used for stock valuation in standard price and as a first price to set in average/FIFO.",
-        default=lambda self: self.product_id.standard_price
+        default=lambda self: self.product_id.standard_price,
         # store=True
     )
 
@@ -43,6 +46,23 @@ class StockMoveLineExt(models.Model):
         compute="_compute_profit_margin",
         string='Profit Margin (%)',
         help="(Sale Price * 100 / Cost) - 100", digits=(16, 2), )
+
+    @api.model
+    def get_write_values(self, id):
+        if type(id) != str:
+            move_line = self.browse(id)
+            vals = {
+                'id': move_line.id,
+                'standard_price': move_line.standard_price,
+                'price_subtotal': move_line.price_subtotal,
+                'profit_margin': move_line.profit_margin,
+                'qty_done': move_line.qty_done,
+                'amount_total': move_line.amount_total,
+                'partial_amount_total': move_line.partial_amount_total,
+            }
+            return vals
+        else:
+            return False
 
     @api.model
     def calculate_cost(self, vals):
@@ -55,6 +75,8 @@ class StockMoveLineExt(models.Model):
                 if move_line.qty_done != 0.0:
                     cost = round(price / move_line.qty_done, 2)
                 move_line.with_context({'price': True}).write({'price_subtotal': price, 'standard_price': cost})
+                return True
+        return False
 
     @api.onchange('price_subtotal')
     def _onchange_calculate_cost(self):

@@ -78,6 +78,8 @@ class StockPicking(models.Model):
                         'id',
                         'tracking',
                         'barcode',
+                        'standard_price',
+                        'list_price'
                     ])[0]
                 move_line_id['location_id'] = \
                     self.env['stock.location'].browse(move_line_id.pop('location_id')[0]).read([
@@ -160,7 +162,7 @@ class StockPicking(models.Model):
                         'date_planned': record.date,
                         'date_approve': record.date,
                         # 'order_line': order_lines,
-                        'state': 'purchase',
+                        'state': 'done',
                         'picking_type_id': record.picking_type_id.id
                     }
 
@@ -234,7 +236,6 @@ class StockPicking(models.Model):
     def button_validate(self):
         res = super(StockPicking, self).button_validate()
         if not self._context:
-
             if self.move_line_ids:
                 purchase_lines = self.move_line_ids.mapped('move_id.purchase_line_id')
                 if purchase_lines:
