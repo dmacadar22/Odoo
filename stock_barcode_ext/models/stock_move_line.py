@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, fields, models, _
-from odoo.addons import decimal_precision as dp
-from odoo.exceptions import UserError, ValidationError
+from odoo import api, fields, models
 
 
 class StockMoveLineExt(models.Model):
     _inherit = "stock.move.line"
 
-    amount_total = fields.Float(related="picking_id.amount_total", string="Invoice Total",
-                                digits=(16, 2), )
+    amount_total = fields.Float(
+        related="picking_id.amount_total",
+        string="Invoice Total",
+        digits=(16, 2),
+    )
 
-    partial_amount_total = fields.Float(related="picking_id.partial_amount_total", string="Invoice Partial Total",
-                                digits=(16, 2), )
+    partial_amount_total = fields.Float(
+        related="picking_id.partial_amount_total",
+        string="Invoice Partial Total",
+        digits=(16, 2),
+    )
 
     description = fields.Text(
         'Product Description',
@@ -21,7 +25,9 @@ class StockMoveLineExt(models.Model):
     )
 
     price_subtotal = fields.Float(
-        string="Invoice Line Total", store=True, digits=(16, 2),
+        string="Invoice Line Total",
+        store=True,
+        digits=(16, 2),
     )
 
     list_price = fields.Float(
@@ -37,7 +43,8 @@ class StockMoveLineExt(models.Model):
         # compute="_compute_standard_price",
         string='Cost',
         digits=(16, 2),
-        help="Cost used for stock valuation in standard price and as a first price to set in average/FIFO.",
+        help=
+        "Cost used for stock valuation in standard price and as a first price to set in average/FIFO.",
         default=lambda self: self.product_id.standard_price,
         # store=True
     )
@@ -45,7 +52,9 @@ class StockMoveLineExt(models.Model):
     profit_margin = fields.Float(
         compute="_compute_profit_margin",
         string='Profit Margin (%)',
-        help="(Sale Price * 100 / Cost) - 100", digits=(16, 2), )
+        help="(Sale Price * 100 / Cost) - 100",
+        digits=(16, 2),
+    )
 
     @api.model
     def get_write_values(self, id):
@@ -74,7 +83,12 @@ class StockMoveLineExt(models.Model):
                 cost = move_line.standard_price
                 if move_line.qty_done != 0.0:
                     cost = round(price / move_line.qty_done, 2)
-                move_line.with_context({'price': True}).write({'price_subtotal': price, 'standard_price': cost})
+                move_line.with_context({
+                    'price': True
+                }).write({
+                    'price_subtotal': price,
+                    'standard_price': cost
+                })
                 return True
         return False
 
@@ -82,13 +96,15 @@ class StockMoveLineExt(models.Model):
     def _onchange_calculate_cost(self):
         for rec in self:
             if rec.qty_done != 0.0:
-                rec.standard_price = round(rec.price_subtotal / rec.qty_done, 2)
+                rec.standard_price = round(rec.price_subtotal / rec.qty_done,
+                                           2)
 
     @api.onchange('qty_done')
     def _onchange_calculate_price(self):
         for rec in self:
             if rec.qty_done != 0.0:
-                rec.price_subtotal = round(rec.standard_price * rec.qty_done, 2)
+                rec.price_subtotal = round(rec.standard_price * rec.qty_done,
+                                           2)
 
     # def get_default_cost(self):
     #     return self.product_id.standard_price
@@ -104,7 +120,9 @@ class StockMoveLineExt(models.Model):
     def _compute_profit_margin(self):
         for rec in self:
             if rec.list_price != 0:
-                rec.profit_margin = round(((rec.list_price - rec.standard_price) / rec.list_price) * 100, 2)
+                rec.profit_margin = round(
+                    ((rec.list_price - rec.standard_price) / rec.list_price) *
+                    100, 2)
 
     @api.onchange('product_id')
     def change_default_value(self):
@@ -116,6 +134,7 @@ class StockMoveLineExt(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        print(self._context, 'Context', vals_list)
         product = None
         if len(vals_list) and vals_list[0].get('product_id', False):
             product_id = vals_list[0].get('product_id', False)
@@ -127,30 +146,24 @@ class StockMoveLineExt(models.Model):
             if vals_list[0].get('price_subtotal', False):
                 price_subtotal = vals_list[0]['price_subtotal']
 
-            vals_list[0].update(
-                {'price_subtotal': price_subtotal, 'list_price': list_price, 'standard_price': standard_price})
+            vals_list[0].update({
+                'price_subtotal': price_subtotal,
+                'list_price': list_price,
+                'standard_price': standard_price
+            })
 
         res_id = super(StockMoveLineExt, self).create(vals_list)
 
-        if product.exists():
-            for vals in vals_list:
-                if 'list_price' in vals:
-                    product.write({'list_price': vals.get('list_price', 0)})
+        print(product, 'Producto', vals_list)
+        if product is not None:
+            if product.exists():
+                for vals in vals_list:
+                    if 'list_price' in vals:
+                        product.write(
+                            {'list_price': vals.get('list_price', 0)})
 
-                # if 'qty_done' in vals:
-                #     if vals.get('qty_done', 0) != 0.0 and vals.get('price_subtotal', 0) != 0:
-                #         product.write({
-                #             'standard_price': vals.get('price_subtotal') / vals.get('qty_done')
-                #         })
-
-                # if 'price_subtotal' in vals:
-                #     if vals.get('qty_done', 0) != 0.0 and vals.get('price_subtotal', 0) != 0:
-                #         product.write({
-                #             'standard_price': vals.get('price_subtotal', 0) / vals.get('qty_done')
-                #         })
-
-                if 'description' in vals:
-                    product.write({'description': vals.get('description')})
+                    if 'description' in vals:
+                        product.write({'description': vals.get('description')})
 
         return res_id
 
@@ -192,7 +205,8 @@ class StockMoveLineExt(models.Model):
 
             if 'qty_done' in vals:
                 if record.qty_done != 0.0:
-                    record.price_subtotal = round(record.standard_price * record.qty_done, 2)
+                    record.price_subtotal = round(
+                        record.standard_price * record.qty_done, 2)
                     # record.product_id.write({
                     #     'standard_price': record.standard_price
                     # })
@@ -205,6 +219,7 @@ class StockMoveLineExt(models.Model):
             #         })
 
             if 'description' in vals:
-                record.product_id.write({'description': vals.get('description')})
+                record.product_id.write(
+                    {'description': vals.get('description')})
 
         return res
