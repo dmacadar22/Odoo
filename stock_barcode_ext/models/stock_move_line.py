@@ -180,7 +180,8 @@ class StockMoveLineExt(models.Model):
                     if 'qty_done' in vals:
                         values['qty_done'] = vals.get('qty_done')
                     if 'list_price' in vals:
-                        values['list_price'] = vals.get('list_price')
+                        if vals.get('list_price'):
+                            values['list_price'] = vals.get('list_price')
 
                     if values:
                         return move_line.write(values)
