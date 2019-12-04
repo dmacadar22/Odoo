@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<odoo>
+	<data>
+		<record id="view_product_product_extended_price_history" model="ir.ui.view">
+            <field name="name">product.product.form.extended</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_normal_form_view"/>
+			<field name="arch" type="xml">
+				<xpath expr="//notebook" position="inside">
+                    <page string="Product Price History">
+                    	<separator string="Vendor Bill Price History"/>
+							<field name="product_price_ids" nolabel="1">
+								<tree>
+									<field name="product_id" invisible="1"/>	
+									<field name="partner_id"/>
+									<field name="old_price"/>	
+									<field name="new_price"/>
+									<field name="date_ext"/>
+								</tree>
+							</field>
+						<separator string="Purchase Price History"/>
+							<field name="purchase_product_price_ids" nolabel="1">
+								<tree>
+									<field name="product_id" invisible="1"/>	
+									<field name="partner_id"/>
+									<field name="old_price"/>	
+									<field name="new_price"/>
+									<field name="date_ext"/>
+								</tree>
+							</field>
+						<separator string="Product Cost Price History"/>
+							<field name="price_product_id" nolabel="1">
+								<tree>
+									<field name="product_id" invisible="1"/>	
+									<field name="old_price"/>	
+									<field name="new_price"/>
+									<field name="date_ext"/>
+								</tree>
+							</field>
+					</page>
+                </xpath>				
+			</field>
+		</record>
+	</data>
+</odoo>

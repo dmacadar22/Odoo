@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_product_product_price,product.product.price,model_product_product_price,base.group_user,1,1,1,0
+access_purchase_product_price,purchase.product.price,model_purchase_product_price,base.group_user,1,1,1,0
+access_product_price,product.product.price,model_product_price,base.group_user,1,1,1,0
+access_product_product,product.product,model_product_product,base.group_user,1,1,1,0
+access_product_price_history,product.price.history,product.model_product_price_history,base.group_user,1,1,1,0
+access_product_attribute_custom_value,product.attribute.custom.value,sale.model_product_attribute_custom_value,base.group_user,1,1,1,0
