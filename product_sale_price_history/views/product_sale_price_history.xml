@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+	<record id="view_product_template_extends" model="ir.ui.view">
+		<field name="name">product.template</field>
+		<field name="model">product.template</field>
+		<field name="inherit_id" ref="product.product_template_only_form_view"/>
+		<field name="arch" type="xml">
+			<xpath expr="//notebook" position="inside">
+   				<page string="Sales Price History">
+   					<group>
+   						<field name="product_product_ids" nolabel="1">
+   							<tree string="Sales Price History" editable="bottom">
+								<field name="customer"/>
+								<field name="user_id"/>
+								<field name="order_name"/>
+								<field name="order_date"/>
+								<field name="product_id"/>
+								<field name="quantity"/>
+								<field name="price_unit"/>
+								<field name="total"/>
+							</tree>
+						</field>
+   					</group>
+				</page>
+			</xpath>
+		</field>
+	</record>
+	
+	<record id="view_product_product_extends" model="ir.ui.view">
+		<field name="name">product.product</field>
+		<field name="model">product.product</field>
+		<field name="inherit_id" ref="product.product_normal_form_view"/>
+		<field name="arch" type="xml">
+			<xpath expr="//notebook" position="inside">
+   				<page string="Sales Price History">
+   					<group>
+   						<field name="product_ids" nolabel="1">
+   							<tree>
+								<field name="customer"/>
+								<field name="user_id"/>
+								<field name="order_name"/>
+								<field name="order_date"/>
+								<field name="product_id"/>
+								<field name="quantity"/>
+								<field name="price_unit"/>
+								<field name="total"/>
+							</tree>
+						</field>
+   					</group>
+				</page>
+			</xpath>
+		</field>
+	</record>
+	
+	<record forcecreate="True" id="product_sale_price_history" model="ir.cron">
+		<field name="name">Sales Price History</field>
+		<field name="model_id" ref="model_product_cron"/>
+		<field name="state">code</field>
+        <field name="code">model.cron_product_price_sale_history()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+	</record>
+	
+	<record forcecreate="True" id="product_template_price_history" model="ir.cron">
+		<field name="name">Sales Product Template Price History</field>
+		<field name="model_id" ref="model_product_cron"/>
+		<field name="state">code</field>
+        <field name="code">model.cron_product_template_price_history()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+	</record>
+</odoo>
