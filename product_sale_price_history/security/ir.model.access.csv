@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_group_product_cron,product.cron,model_product_cron,base.group_user,1,1,1,1
+access_group_price_history,price.history,model_price_history,base.group_user,1,1,1,1

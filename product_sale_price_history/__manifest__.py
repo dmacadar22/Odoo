@@ -54,6 +54,7 @@ product
     'images': ['static/description/Banner.jpg'],
     'depends' : ['base', 'product', 'sale', 'sale_management'],
     'data': [
+        'security/ir.model.access.csv',
         'views/product_sale_price_history.xml',
         'views/res_config.xml',
     ],
