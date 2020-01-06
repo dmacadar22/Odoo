@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="CustomerNotifyWidget">
+        <div class="modal-dialog" role="dialog">
+            <div class="popup popup-alert">
+                <p class="title">
+                    <t t-esc=" widget.options.title || 'Alert' "/>
+                </p>
+                <p class="body">
+                    <t t-esc=" widget.options.body || '' "/>
+                </p>
+                <div class="footer">
+                    <div class="button cancel">No</div>
+                    <div class="button confirm">Yes</div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="POSTextInputPopupWidget">
+        <div class="modal-dialog" role="dialog">
+            <div class="popup popup-textinput">
+                <header class="title">
+                    <t t-esc=" widget.options.title || '' "/>
+                </header>
+                <input style="margin-left: 10%; margin-right: 10%;" t-att-value="widget.options.value || ''" type="date"/>
+                <div class="footer">
+                    <div class="button confirm">Ok
+                    </div>
+                    <div class="button cancel">Cancel
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="POSInfoPopupWidget">
+        <div class="modal-dialog" role="dialog">
+            <div class="popup popup-info">
+                <p class="title">
+                    <t t-esc=" widget.options.title || 'Error' "/>
+                </p>
+                <p class="body">
+                    <t t-esc=" widget.options.body || '' "/>
+                </p>
+                <div class="footer">
+                    <div class="button cancel">Ok
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="POSErrorPopupWidget">
+        <div class="modal-dialog" role="dialog">
+            <div class="popup popup-error">
+                <p class="title">
+                    <t t-esc=" widget.options.title || 'Error' "/>
+                </p>
+                <p class="body">
+                    <t t-esc=" widget.options.body || '' "/>
+                </p>
+                <div class="footer">
+                    <div class="button cancel">Ok
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="cusotm_age_assets" name="Custom point_of_sale assets" inherit_id="point_of_sale.assets">
+        <xpath expr="." position="inside">
+            <link href="/star_pos_product_age_restriction/static/src/css/star_pos_product_age_restriction.css" rel="stylesheet"></link>
+            <script type="text/javascript" src="/star_pos_product_age_restriction/static/src/js/custom_models.js"></script>
+        </xpath>
+    </template>
+</odoo>
