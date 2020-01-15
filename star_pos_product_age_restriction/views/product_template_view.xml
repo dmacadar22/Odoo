@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="pos_product_template_form_view" model="ir.ui.view">
+        <field name="name">product.template.form.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='options']" position="inside">
+                <div>
+                    <field name="apply_age_limit"/>
+                    <label for="apply_age_limit"/>
+                </div>
+            </xpath>
+            <field name="categ_id" position="after">
+                <field name="cust_minimum_age" attrs="{'invisible': [('apply_age_limit', '=', False)],
+                                                       'required': [('apply_age_limit', '=', True)]}"/>
+            </field>
+        </field>
+    </record>
+</odoo>

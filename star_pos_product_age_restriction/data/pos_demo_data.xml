@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="custom_pos_demo_data" model="pos.demo.data.age">
+        <field name="eligible_message">You are eligible to purchase this product.</field>
+        <field name="not_eligible_message">Sorry you are under age.</field>
+    </record>
+</odoo>
