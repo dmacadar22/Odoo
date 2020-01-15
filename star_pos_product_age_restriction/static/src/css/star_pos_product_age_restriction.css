@@ -1,0 +1,7 @@
+.pos .popup.popup-info {
+    background-color: #dff0d8;
+}
+.pos .popup.popup-info .title, .pos .popup.popup-info .button  {
+    color: #3c763d;
+    background: #dff0d8;
+}
