@@ -5,6 +5,10 @@ from odoo.exceptions import UserError
 from odoo.tools import float_is_zero, pycompat
 from odoo.addons import decimal_precision as dp
 
+import logging
+
+_logger = logging.getLogger('product')
+
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
     
@@ -113,6 +117,10 @@ class ProductMod(models.Model):
             'product' : product.product_tmpl_id,
             'user' : env.user.id
         }
+        return {
+                        'warning': {'title': "Warning",'message': "Boom!  New price is: " + str(new_price) + "and old price is: " str(standard_price)}
+                    }
+                    
         env['product.history.tracking'].create(data_history)
         self.write({
             'standard_price': new_price
