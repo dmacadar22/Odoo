@@ -1,2 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_product_history_tracking_product_history_tracking,product_history_tracking.product_history_tracking,model_product_history_tracking_product_history_tracking,,1,0,0,0
+access_product_history_tracking,product_history_tracking,model_product_history_tracking,,1,0,0,0
