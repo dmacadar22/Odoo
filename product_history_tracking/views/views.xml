@@ -13,10 +13,10 @@
                   <tree string="Product History" default_order="modified_datetime desc">
                     <field name="modified_datetime"/>
                     <field name="user"/>
-                    <field name="previous_list_price" widget="char"/>
-                    <field name="list_price" widget="char"/>
-                    <field name="previous_standard_price" widget="char"/>
-                    <field name="standard_price" widget="char"/>
+                    <field name="previous_list_price" widget="monetary"/>
+                    <field name="list_price" widget="monetary"/>
+                    <field name="previous_standard_price" widget="monetary"/>
+                    <field name="standard_price" widget="monetary"/>
                   </tree>
                 </field>
               </group>
@@ -37,10 +37,10 @@
                   <tree string="Product History" default_order="modified_datetime desc">
                     <field name="modified_datetime"/>
                     <field name="user"/>
-                    <field name="previous_list_price" widget="char"/>
-                    <field name="list_price" widget="char"/>
-                    <field name="previous_standard_price" widget="char"/>
-                    <field name="standard_price" widget="char"/>
+                    <field name="previous_list_price" widget="monetary"/>
+                    <field name="list_price" widget="monetary"/>
+                    <field name="previous_standard_price" widget="monetary"/>
+                    <field name="standard_price" widget="monetary"/>
                   </tree>
                 </field>
               </group>
