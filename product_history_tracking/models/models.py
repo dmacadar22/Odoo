@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, tools, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, Warning
 from odoo.tools import float_is_zero, pycompat
 from odoo.addons import decimal_precision as dp
 
@@ -120,7 +120,7 @@ class ProductMod(models.Model):
         return {
                         'warning': {'title': "Warning",'message': "Boom!  New price is: " + str(new_price) + "and old price is: " str(standard_price)}
                     }
-                    
+
         env['product.history.tracking'].create(data_history)
         self.write({
             'standard_price': new_price
