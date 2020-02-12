@@ -22,6 +22,8 @@ if round(record['list_price'],2) != round(record['previous_list_price'],2):
   data_history = {
     'list_price' : record['list_price'],
     'previous_list_price' : record['previous_list_price'],
+    'standard_price' : record['standard_price'], #Maintain consistency; this value is updated directly in the overriden function
+    'previous_standard_price' : record['standard_price'], #See above
     'modified_date' : datetime.date.today(),
     'modified_datetime' : datetime.datetime.now(),
     'product' : record['id'],
