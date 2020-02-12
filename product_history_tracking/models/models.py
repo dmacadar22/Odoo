@@ -116,7 +116,7 @@ class ProductProduct(models.Model):
             'list_price' : product.list_price, #Maintaining consistency; this value is updated through an automated action
             'previous_list_price' : product.list_price, #See above
             'modified_datetime' : datetime.now(),
-            'product' : product.product_tmpl_id,
+            'product' : product.product_tmpl_id.id,
             'user' : self.env.user.id
         }
         #raise UserError(_('Boom!  New price is: ' + str(new_price) + 'and old price is: ' + str(standard_price)))
