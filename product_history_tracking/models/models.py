@@ -14,8 +14,6 @@ class ProductTemplate(models.Model):
         string="Product History",
         comodel_name="product.history.tracking",
         inverse_name="product",
-        domain="[]",
-        context={},
         help="Product History",
     )
 
