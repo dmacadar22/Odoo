@@ -112,11 +112,11 @@ class ProductProduct(models.Model):
                     move.post()
         data_history = {
             'standard_price' : new_price,
-            'previous_standard_price' : self.product.standard_price,
-            'list_price' : self.product.list_price, #Maintaining consistency; this value is updated through an automated action
-            'previous_list_price' : self.product.list_price, #See above
+            'previous_standard_price' : self.standard_price,
+            'list_price' : self.list_price, #Maintaining consistency; this value is updated through an automated action
+            'previous_list_price' : self.list_price, #See above
             'modified_datetime' : datetime.now(),
-            'product' : self.product.product_tmpl_id.id,
+            'product' : self.product_tmpl_id.id,
             'user' : self.env.user.id
         }
         #raise UserError(_('Boom!  New price is: ' + str(new_price) + 'and old price is: ' + str(standard_price)))
