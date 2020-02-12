@@ -62,7 +62,7 @@ class ProductProduct(models.Model):
     #     #context={},
     # )
 
-    @api.multi
+    #@api.multi
     def do_change_standard_price(self, new_price, account_id):
         """ Changes the Standard Price of Product and creates an account move accordingly."""
         AccountMove = self.env['account.move']
