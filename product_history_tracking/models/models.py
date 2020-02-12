@@ -47,7 +47,7 @@ class ProductHistoryTracking(models.Model):
     )
 
 
-class ProductMod(models.Model):
+class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     # # previous_list_price = fields.Float(
