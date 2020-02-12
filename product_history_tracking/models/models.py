@@ -121,7 +121,7 @@ class ProductProduct(models.Model):
         }
         #raise UserError(_('Boom!  New price is: ' + str(new_price) + 'and old price is: ' + str(standard_price)))
 
-        env['product.history.tracking'].create(data_history)
+        self.env['product.history.tracking'].create(data_history)
         self.write({
             'standard_price': new_price
             })
