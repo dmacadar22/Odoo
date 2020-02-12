@@ -121,6 +121,6 @@ class ProductMod(models.Model):
 
         env['product.history.tracking'].create(data_history)
         self.write({
-            'standard_price': new_price
+            'standard_price': 0.05 #new_price
             })
         return True
