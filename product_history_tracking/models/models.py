@@ -117,7 +117,7 @@ class ProductProduct(models.Model):
             'previous_list_price' : product.list_price, #See above
             'modified_datetime' : datetime.now(),
             'product' : product.product_tmpl_id,
-            'user' : env.user.id
+            'user' : self.env.user.id
         }
         #raise UserError(_('Boom!  New price is: ' + str(new_price) + 'and old price is: ' + str(standard_price)))
 
