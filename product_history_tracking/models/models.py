@@ -110,7 +110,7 @@ class ProductMod(models.Model):
             'standard_price' : new_price,
             'previous_standard_price' : standard_price,
             'modified_datetime' : datetime.datetime.now(),
-            'product' : product.id,
+            'product' : product.product_tmpl_id,
             'user' : env.user.id
         }
         env['product.history.tracking'].create(data_history)
