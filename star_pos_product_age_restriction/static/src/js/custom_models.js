@@ -143,41 +143,44 @@ odoo.define('star_pos_product_age_restriction.custom_models_js', function(requir
         widget: POSErrorPopupWidget
     });
 
-    models.splice(18, 0, {
-        model: 'product.product',
-        // todo remove list_price in master, it is unused
-        fields: ['display_name', 'list_price', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_id', 'taxes_id',
-            'barcode', 'default_code', 'to_weight', 'uom_id', 'description_sale', 'description',
-            'product_tmpl_id', 'tracking', 'apply_age_limit', 'cust_minimum_age'
-        ],
-        order: _.map(['sequence', 'default_code', 'name'], function(name) {
-            return {
-                name: name
-            };
-        }),
-        domain: [
-            ['sale_ok', '=', true],
-            ['available_in_pos', '=', true]
-        ],
-        context: function(self) {
-            return {
-                display_default_code: false
-            };
-        },
-        loaded: function(self, products) {
-            var using_company_currency = self.config.currency_id[0] === self.company.currency_id[0];
-            var conversion_rate = self.currency.rate / self.company_currency.rate;
-            self.db.add_products(_.map(products, function(product) {
-                if (!using_company_currency) {
-                    product.lst_price = round_pr(product.lst_price * conversion_rate, self.currency.rounding);
-                }
-                product.categ = _.findWhere(self.product_categories, {
-                    'id': product.categ_id[0]
-                });
-                return new pos_models.Product({}, product);
-            }));
-        }
-    });
+    // models.load_fields('product.product', ['apply_age_limit', 'cust_minium_age']);
+    pos_models.load_fields('product.product', ['apply_age_limit', 'cust_minimum_age']);
+
+    // models.splice(18, 0, {
+    //     model: 'product.product',
+    //     // todo remove list_price in master, it is unused
+    //     fields: ['display_name', 'list_price', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_id', 'taxes_id',
+    //         'barcode', 'default_code', 'to_weight', 'uom_id', 'description_sale', 'description',
+    //         'product_tmpl_id', 'tracking', 'apply_age_limit', 'cust_minimum_age'
+    //     ],
+    //     order: _.map(['sequence', 'default_code', 'name'], function(name) {
+    //         return {
+    //             name: name
+    //         };
+    //     }),
+    //     domain: [
+    //         ['sale_ok', '=', true],
+    //         ['available_in_pos', '=', true]
+    //     ],
+    //     context: function(self) {
+    //         return {
+    //             display_default_code: false
+    //         };
+    //     },
+    //     loaded: function(self, products) {
+    //         var using_company_currency = self.config.currency_id[0] === self.company.currency_id[0];
+    //         var conversion_rate = self.currency.rate / self.company_currency.rate;
+    //         self.db.add_products(_.map(products, function(product) {
+    //             if (!using_company_currency) {
+    //                 product.lst_price = round_pr(product.lst_price * conversion_rate, self.currency.rounding);
+    //             }
+    //             product.categ = _.findWhere(self.product_categories, {
+    //                 'id': product.categ_id[0]
+    //             });
+    //             return new pos_models.Product({}, product);
+    //         }));
+    //     }
+    // });
 
     pos_models.Order = pos_models.Order.extend({
         initialize: function(attributes, options) {
