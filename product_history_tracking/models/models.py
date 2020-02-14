@@ -127,43 +127,43 @@ class ProductProduct(models.Model):
             })
         return True
 
-class StockMove(models.Model):
-    _inherit = "stock.move"
-       def product_price_update_before_done(self, forced_qty=None):
-        tmpl_dict = defaultdict(lambda: 0.0)
-        # adapt standard price on incomming moves if the product cost_method is 'average'
-        std_price_update = {}
-        for move in self.filtered(lambda move: move._is_in() and move.product_id.cost_method == 'average'):
-            product_tot_qty_available = move.product_id.qty_available + tmpl_dict[move.product_id.id]
-            rounding = move.product_id.uom_id.rounding
+# class StockMove(models.Model):
+#     _inherit = "stock.move"
+#        def product_price_update_before_done(self, forced_qty=None):
+#         tmpl_dict = defaultdict(lambda: 0.0)
+#         # adapt standard price on incomming moves if the product cost_method is 'average'
+#         std_price_update = {}
+#         for move in self.filtered(lambda move: move._is_in() and move.product_id.cost_method == 'average'):
+#             product_tot_qty_available = move.product_id.qty_available + tmpl_dict[move.product_id.id]
+#             rounding = move.product_id.uom_id.rounding
 
-            qty_done = move.product_uom._compute_quantity(move.quantity_done, move.product_id.uom_id)
-            qty = forced_qty or qty_done
-            # If the current stock is negative, we should not average it with the incoming one
-            if float_is_zero(product_tot_qty_available, precision_rounding=rounding) or product_tot_qty_available < 0:
-                new_std_price = move._get_price_unit()
-            elif float_is_zero(product_tot_qty_available + move.product_qty, precision_rounding=rounding) or \
-                    float_is_zero(product_tot_qty_available + qty, precision_rounding=rounding):
-                new_std_price = move._get_price_unit()
-            else:
-                # Get the standard price
-                amount_unit = std_price_update.get((move.company_id.id, move.product_id.id)) or move.product_id.standard_price
-                new_std_price = ((amount_unit * product_tot_qty_available) + (move._get_price_unit() * qty)) / (product_tot_qty_available + qty)
+#             qty_done = move.product_uom._compute_quantity(move.quantity_done, move.product_id.uom_id)
+#             qty = forced_qty or qty_done
+#             # If the current stock is negative, we should not average it with the incoming one
+#             if float_is_zero(product_tot_qty_available, precision_rounding=rounding) or product_tot_qty_available < 0:
+#                 new_std_price = move._get_price_unit()
+#             elif float_is_zero(product_tot_qty_available + move.product_qty, precision_rounding=rounding) or \
+#                     float_is_zero(product_tot_qty_available + qty, precision_rounding=rounding):
+#                 new_std_price = move._get_price_unit()
+#             else:
+#                 # Get the standard price
+#                 amount_unit = std_price_update.get((move.company_id.id, move.product_id.id)) or move.product_id.standard_price
+#                 new_std_price = ((amount_unit * product_tot_qty_available) + (move._get_price_unit() * qty)) / (product_tot_qty_available + qty)
 
-            tmpl_dict[move.product_id.id] += qty_done
+#             tmpl_dict[move.product_id.id] += qty_done
 			
-			data_history = {
-            'standard_price' : new_std_price,
-            'previous_standard_price' : move.product_id.standard_price,
-            'list_price' : move.product_id.list_price, #Maintaining consistency; this value is updated through an automated action
-            'previous_list_price' : move.product_id.list_price, #See above
-            'modified_datetime' : datetime.now(),
-            'product' : move.product_id.product_tmpl_id.id,
-            'user' : self.env.user.id
-			}
+# 			data_history = {
+#             'standard_price' : new_std_price,
+#             'previous_standard_price' : move.product_id.standard_price,
+#             'list_price' : move.product_id.list_price, #Maintaining consistency; this value is updated through an automated action
+#             'previous_list_price' : move.product_id.list_price, #See above
+#             'modified_datetime' : datetime.now(),
+#             'product' : move.product_id.product_tmpl_id.id,
+#             'user' : self.env.user.id
+# 			}
 
-			self.env['product.history.tracking'].create(data_history)
+# 			self.env['product.history.tracking'].create(data_history)
 			
-            # Write the standard price, as SUPERUSER_ID because a warehouse manager may not have the right to write on products
-            move.product_id.with_context(force_company=move.company_id.id).sudo().write({'standard_price': new_std_price})
-            std_price_update[move.company_id.id, move.product_id.id] = new_std_price
+#             # Write the standard price, as SUPERUSER_ID because a warehouse manager may not have the right to write on products
+#             move.product_id.with_context(force_company=move.company_id.id).sudo().write({'standard_price': new_std_price})
+#             std_price_update[move.company_id.id, move.product_id.id] = new_std_price
