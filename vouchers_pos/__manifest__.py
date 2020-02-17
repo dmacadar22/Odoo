@@ -27,7 +27,7 @@
     'author': 'Cybrosys Techno Solutions',
     'website': "https://www.cybrosys.com",
     'company': 'Cybrosys Techno Solutions',
-    'depends': ['point_of_sale','pos_geniusfund'],
+    'depends': ['point_of_sale'],
     'data': [
              'data/product_data.xml',
              'views/gift_voucher.xml',
