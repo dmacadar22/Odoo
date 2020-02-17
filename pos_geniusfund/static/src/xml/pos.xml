@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-extend="Orderline">
+        <t t-jquery=".orderline-container" t-operation="replace">
+            <div style="display:table-row" t-attf-class="orderline #{ line.selected ? 'selected' : '' } #{line.get_product().categ_id[0]}">
+                <div class="line-cell pos_product_image">
+                    <img t-att-src='image_url'/>
+                </div>
+                <div class="line-cell cell-product-name product-name"><!-- class="product-name" -->
+                    <div><t t-esc="line.get_product().display_name"/></div>
+                    <div><span class="product-SKU">Sku</span></div>
+                    <div class="product-THC-content">
+                        <i class='fa fa-exclamation-circle'/>
+                        <t t-if="line.get_categ_id() == 8">THC: </t>
+                        <t t-if="line.get_categ_id() == 9">Concentrate: </t>
+                        <t t-esc="line.get_product().x_studio_thc_content_g"/>g
+                    </div>
+                    <!--
+                    <t t-if="line.get_product().tracking!=='none'">
+                        <i class="oe_link_icon fa fa-list oe_icon line-lot-icon oe_green" t-if="line.has_valid_product_lot()"
+                           aria-label="Valid product lot" role="img" title="Valid product lot"/>
+                        <i class="oe_link_icon fa fa-list oe_icon line-lot-icon oe_red" t-if="!line.has_valid_product_lot()"
+                           aria-label="Invalid product lot" role="img" title="Invalid product lot"/>
+                    </t>
+                    -->
+                </div>                
+                <div class="line-cell cell-product-price">
+                    <t t-esc="widget.format_currency(line.get_unit_display_price())"/>
+                    <t t-if="line.get_unit().name"> <t t-esc="line.get_unit().name"/></t>
+                </div><!--class="price"-->
+                <div class="line-cell txt-right cell-discount">
+                    <t t-if="line.get_discount_str() !== '0'">
+                        <t t-esc="line.get_discount_str()" />%
+                    </t>
+                </div>
+                <div class="line-cell cell-quantity" style="padding:0">
+                    <button class="orderline-btn btn_minus">
+                        <i class="fa fa-minus" />
+                    </button>
+                    <div class="line-quant">
+                        <t t-esc="line.get_quantity()" />
+                    </div>
+                    <button class="orderline-btn btn_plus">
+                        <i class="fa fa-plus" />
+                    </button>
+                </div>
+                <div class="line-cell cell-total txt-right"><t t-esc="widget.format_currency(line.get_price_without_tax())" /></div>
+                <div class="line-cell cell-btn-remove" style="padding:0">
+                    <button class="orderline-btn btn_remove remove oe_icon">
+                        <i class="fa fa-trash-o" />
+                    </button>
+                </div>
+            </div>
+        </t>
+    </t>
+    
+    <t t-extend="OrderWidget">
+        <t t-jquery=".order-container" t-operation="replace"><!-- to keep or not to keep control of the entire widget ? -->
+            <div class="order-container">
+                <div class="order-scroller touch-scrollable">
+                    <div class="order">
+                        <t t-if="orderlines.length === 0" >
+                            <div class='order-empty'>
+                                <i class='fa fa-shopping-cart' role="img" aria-label="Shopping cart" title="Shopping cart"/>
+                                <h1>Your cart is empty :(</h1>
+                            </div>
+                        </t>
+                        <t t-if="orderlines.length > 0">
+                            <div class="orderlineTable orderlines">                                
+                                <div class="table-row table-header">
+                                    <div>Product name</div>
+                                    <div></div>
+                                    <div>Price/Unit</div>
+                                    <div>Discount</div>
+                                    <div>Quantity</div>
+                                    <div>Total</div>
+                                    <div></div>
+                                </div>
+                            </div>
+
+                            <div class="summary clearfix" style="display:none">
+                                <div class="line">
+                                    <div class='entry total'>
+                                        <span class="badge">Total: </span> <span class="value">0.00 €</span>
+                                        <div class='subentry'>Taxes: <span class="value">0.00€</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </t>
+                    </div>
+                </div>
+                
+            </div>
+        </t>
+    </t>
+    
+    <t t-extend="OrderSelectorWidget">
+        <t t-jquery=".order-sequence" t-operation="replace">
+            <t t-if="order.get_client()">
+                <div>
+                    <div class="OrderSelectorWidget-user_pastille" t-attf-style="background-image:url(/web/image/res.partner/#{order.get_client().id}/image_small)"/>
+                    <t t-esc='order.get_client().name'/>
+                </div>
+            </t>
+            <t t-else="">
+                <span class='order-sequence'>
+                    <t t-esc='order.sequence_number' />
+                </span>
+            </t>
+        </t>
+    </t>
+    
+    <t t-extend="ProductScreenWidget">
+        
+        <t t-jquery=".window" t-operation="prepend">
+            <div class="top-buttons">                
+                <button class='button set-customer' onclick="pos_genius_customer()">Change Customer</button>
+                <button class='return-button' onclick="pos_genius_return()">Return</button>
+                <!--<button class='manager-login' onclick="pos_genius_manager_login()">Manager Log In</button>-->
+            </div>
+        </t>
+        
+        <t t-jquery=".rightpane" t-operation="prepend"><!--header-cell-->
+            
+            <div class="current-customer">
+                
+                    <div class="kanban-etiquette client-line" > <!--t-att-data-id='widget.pos.get_client()'-->
+                        <div class="col_1">
+                            <div class="kanban-cust-image">
+                                <img class="partner_image"/>
+                            </div>
+                        </div>
+                        <div class="col_2 partner_txt">
+                            <div class="partner_name name_partner"></div>                    
+                            <div><strong>ID: </strong><span class="partner_id"/></div>
+                            <div><strong>Dob: </strong><span class="partner_dob"/></div>
+                            <div><strong>Member since: </strong><span class="partner_since"/></div>
+                            <div><strong>Last visit: </strong><span class="partner_last" /></div>
+                            <div><strong>Price list: </strong><span class='detail property_product_pricelist'/></div>
+                            <br/>
+                        </div>
+
+                        <div class="current-cust-daily-limits">
+                            <div class="progress" style="overflow:hidden">                        
+                                <div class="progress-bar thc_gauge" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"/>
+                            </div>
+                            <div>
+                                <strong class="limit-categ">THC</strong>
+                                <span><span id="new_thc_today"/> of 28.5g Used</span>
+                                <strong class="limit-remaining"><span id="thc_left">0</span>g Left</strong>  
+                            </div>
+                            <div class="progress" style="overflow:hidden">
+                                <div class="progress-bar concentrate_gauge" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"/>
+                            </div>                            
+                            <div>
+                                <strong class="limit-categ">Concentrate</strong>
+                                <span><span id="new_concentrate_today"/> of 8g Used</span>
+                                <strong class="limit-remaining"><span id="concentrate_left">0</span>g Left</strong>
+                            </div>
+                            
+                            <input type="hidden" id="actual_thc_today" value="0" />
+                            <input type="hidden" id="actual_concentrate_today" value="0" />
+                            
+                        </div>
+                        <div class="current-cust-actions">
+                            <button class="cust-notes" onclick="pos_genius_add_notes()">Notes</button>
+                            <button class="cust-profile" onclick="pos_genius_see_profile()">Profile</button>
+                            <button class="cust-orders" onclick="pos_genius_customer_orders()">Orders</button>
+                        </div>
+                    </div>
+            </div>
+        </t>
+        
+        <t t-jquery=".control-buttons" t-operation="prepend">         
+            <div class='control-button'>
+                <div class="coupons-rework">
+                    <i class='fa fa-star'/> Coupons
+                </div>
+            </div>
+        </t>    
+        
+        <t t-jquery=".pads" t-operation="append">
+            <div class='order-price-summary'>
+                <div class="line">
+                    <div class='entry total'>
+                        <div class='original_price'>Original Price: <span class="value" id="summary_orig_price">$0.00</span></div>                        
+                        <div class='discount'>Discount: <span class="value" id="summary_discount">$0.00</span></div>                        
+                        <div class='subtotal'>Subtotal: <span class="value" id="summary_subtotal">$0.00</span></div>                        
+                        <div class='subentry'>Taxes: <span class="value" id="summary_taxes">$0.00</span></div>
+                        <span class="badge">Total: </span> <span class="value" id="summary_total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </t>
+    
+    <t t-extend="ActionpadWidget">
+        <t t-jquery=".pay" t-operation="replace">
+            <button class='button pay'>
+                <div class='achtun-limits'>
+                    <i class='fa fa-exclamation-circle' role="img" aria-label="Limit" title="Achtun"/>
+                </div>
+                <pre class="text-btn-payment">Payment</pre>
+            </button>
+        </t>
+    </t>
+    <t t-extend="ProductCategoriesWidget">
+        <t t-jquery=".category-list-scroller" t-operation="append">
+            <div class="custom-categories">
+                <span class="category-button js-category-switch" data-category-id="">
+                    <div class="category-img">
+                        <img alt="Category" src=""/>
+                    </div>
+                    <div class="category-name">
+                        Accessories
+                    </div>
+                </span>
+            </div>
+            <div class="custom-categories">
+                <span class="category-button js-category-switch" data-category-id="">
+                    <div class="category-img">
+                        <img alt="Category" src=""/>
+                    </div>
+                    <div class="category-name">
+                       Favorites
+                    </div>
+                </span>
+            </div>
+            <div class="custom-categories">
+                <span class="category-button js-category-switch" data-category-id="">
+                    <div class="category-img">
+                        <img alt="Category" src=""/>
+                    </div>
+                    <div class="category-name">
+                        Featured
+                    </div>
+                </span>
+            </div>
+            <div class="custom-categories">
+                <span class="category-button js-category-switch" data-category-id="">
+                    <div class="category-img">
+                        <img alt="Category" src=""/>
+                    </div>
+                    <div class="category-name">
+                        Miscellaneous
+                    </div>
+                </span>
+            </div>            
+        </t>    
+    </t>
+    
+    
+    <t t-extend="ClientListScreenWidget">
+        <t t-jquery=".screen-content" t-operation="replace">
+            
+            <section class="top-content">
+                <span class='button back'>
+                    <i class='fa fa-angle-double-left'></i>
+<!--                     Cancel -->
+                </span>
+                <span class='button new-customer' role="img" aria-label="Add a customer" title="Add a customer">
+                    <i class='fa fa-plus'></i>
+                    New Customer
+                </span>
+
+                <div class="middle-buttons">
+                    <span aria-label="" class="middle-button in-store" title="In Store">In Store</span>
+                    <span aria-label="" class="middle-button today" title="Today">Today</span>
+                    <span aria-label="" class="middle-button all-customers" title="All">All</span>
+                </div>
+                
+                <span class='searchbox'>
+                    <input placeholder='Search Names' />
+                    <span class='search-clear'></span>
+                </span>
+                <!--
+                <span class='button next oe_hidden highlight' style="display:none">
+                    Select Custome
+                    <i class='fa fa-angle-double-right'></i>
+                </span>
+                -->
+            </section>
+            
+            <section class="full-content">
+                <div class='window'>
+                    <section class='subwindow collapsed'>
+                        <div class='subwindow-container collapsed'>
+                            <div class='subwindow-container-fix client-details-contents'></div>
+                        </div>
+                     </section>
+                    <section class='subwindow'>
+                        <div class='subwindow-container'>
+                            <div class='subwindow-container-fix touch-scrollable scrollable-y'>
+                                <div class='client-list-contents'></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+        </t>
+    </t><!-- end ClientListScreenWidget -->
+
+
+    <t t-extend="ClientLine">
+        <t t-jquery=".client-line" t-operation="replace">
+            <div class="kanban-etiquette client-card" t-att-data-id='partner.id'>
+                <div class="col_1">
+                    <div class="kanban-cust-image">
+                        <img t-attf-src="/web/image/res.partner/#{partner.id}/image_small"/>
+                    </div>
+                </div>
+                <div class="col_2 partner_txt">
+                    <div class="partner_name"><t t-esc='partner.name' /></div>                    
+                    <div><strong>ID: </strong><t t-esc='partner.city' /></div>
+                    <div><strong>Dob: </strong><t t-esc='partner.x_studio_date_of_birth or ""' /></div>
+                    <div><strong>Member since: </strong></div>
+                    <div><strong>Last visit: </strong><t t-esc='partner.x_studio_last_visit or ""'/></div>
+                    <div><strong>THC limit: </strong><t t-exc='partner.x_studio_thc_products_today'/>/28g</div>
+                    <div><strong>Concentrate limit: </strong><t t-exc='partner.x_studio_concentrate'/>/8g</div>
+                    <div><strong>Reward points: </strong><t t-exc='partner.loyalty_points'/></div>
+                    <div>
+                        <strong>Price list: </strong>
+                        <t t-if='partner.property_product_pricelist'>
+                            <span class='detail property_product_pricelist'><t t-esc='partner.property_product_pricelist[1]'/></span>
+                        </t>
+                        <t t-if='!partner.property_product_pricelist'>
+                            <span class='detail property_product_pricelist empty'>N/A</span>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </t><!-- end ClientLine -->
+
+    <t t-extend="ClientDetails">
+        <t t-jquery=".client-details" t-operation="replace"><!-- .client-details-left append -->
+            <!--
+            <div class='client-detail'>
+                <span class='label'>THC today (g):</span>
+                <span class='detail client-thc_limit'><i t-esc="partner.x_studio_thc_products_today" id="thc_today"/>/28g</span>
+            </div>
+            <div class='client-detail'>
+                <span class='label'>Concentrate today (g):</span>
+                <span class='detail client-x_studio_concentrate'><i t-esc="partner.x_studio_concentrate" id="concentrate_today"/>/8g</span>
+            </div>
+        -->
+        </t>
+    </t><!-- end ClientDetails -->
+
+    
+    <t t-extend="PaymentScreenWidget">
+        <t t-jquery=".left-content" t-operation="prepend">
+            <div class='order-total'>
+                <div class="price-tag">
+                    <h1>Total</h1>
+<!--                     Should use line below but order.get_total_with_tax returns an error "order" is not defined / JS to reproduce is in screens.js -> render_paymentlines -->
+<!--                     <p id="total-price"><t t-esc="widget.format_currency(order.get_total_with_tax())"/></p> -->
+
+                </div>
+            </div>
+        </t>
+        <t t-jquery=".paymentmethods-container" t-operation="prepend">
+            <p class="select">Select a payment method</p>
+            <div class="row">
+                <div class="col-6 width-45" style="margin-left: 16px">
+                    <p>Card</p>
+                    <i class="far fa fa-credit-card"></i>
+                </div>  
+                <div class="col-6 width-45" style="margin-right: 16px">
+                    <p>Cash</p>
+                    <i class="fas fa fa-money"></i>
+                </div>
+              
+            </div>
+        </t>
+        <t t-jquery=".payment-buttons" t-operation="replace">        
+            <div class='payment-buttons'>
+                <div class="recap-due">
+                  <div>
+                    <h1  class="label-due-or-change">
+                      Due
+                    </h1>
+                    <p class="total-due-or-change">
+                    </p>
+                  </div>
+                </div>                    
+                <div class='button js_cashdrawer'>
+                    <i class=''/> Open Cashbox
+                </div>
+                <div class='button next '>
+                    <i class=''/> Validate
+                </div>                
+            </div>        
+        </t>     
+    </t><!-- end PaymentScreenWidget -->
+    
+    <t t-extend="PaymentScreen-Numpad">
+        <t t-jquery=".numpad" t-operation="replace">
+            <div class="numpad">
+                <button class="input-button number-char" data-action='1'>1</button>
+                <button class="input-button number-char" data-action='2'>2</button>
+                <button class="input-button number-char" data-action='3'>3</button>
+                <button class="mode-button" data-action='+1'>+1</button>
+                <button class="mode-button" data-action='+20'>+20</button>
+                <br />
+                <button class="input-button number-char" data-action='4'>4</button>
+                <button class="input-button number-char" data-action='5'>5</button>
+                <button class="input-button number-char" data-action='6'>6</button>                
+                <button class="mode-button" data-action='+5'>+5</button>
+                <button class="mode-button" data-action='+50'>+50</button>                
+                <br />
+                <button class="input-button number-char" data-action='7'>7</button>
+                <button class="input-button number-char" data-action='8'>8</button>
+                <button class="input-button number-char" data-action='9'>9</button>
+                <button class="mode-button" data-action='+10'>+10</button>
+                <button class="mode-button" data-action='+100'>+100</button>                
+                <br />
+                <button class="input-button number-char" t-att-data-action='widget.decimal_point'><t t-esc='widget.decimal_point'/></button>                
+                <button class="input-button number-char" data-action='0'>0</button>
+                <button class="input-button numpad-backspace" data-action='BACKSPACE' >
+                    <img src="/point_of_sale/static/src/img/backspace.png" width="24" height="21" alt="Backspace"/>
+                </button>
+                <button class="input-button numpad-char clear-numpad" data-action='CLEAR'>Clear</button>
+            </div>
+        </t>    
+    </t><!-- end PaymentScreen-Numpad -->
+    
+    <t t-name="ScreenCustomerOrders">
+         <div class="return-screen screen">
+            <div class="screen-content" style="max-width:none">
+                <section class="top-content" style="height:92px">
+                    <span class='button back' style="margin:26px 10px">
+                        <i class='fa fa-angle-double-left'></i>
+                        Back
+                    </span>                    
+                </section>
+                <section class="full-content" style="top:122px">
+                    
+                    <div class='window'>
+                        <section class='subwindow'>
+                            <div class='subwindow-container'>
+                                <div class="leftPanel" style="width:449px;float:left;overflow:hidden;padding:0 20px 0 21px;height: calc(100vh - 92px)">
+                                    <span class='searchbox' style="position:inherit;margin:0;display:block;width:408px">
+                                        <input placeholder='Search all orders' style="width=348px;"/>
+                                        <span class='search-clear'></span>
+                                    </span>
+                                    <span class='searchbox'></span>
+                                    <div class='subwindow-container-fix touch-scrollable scrollable-y'>
+                                        <table class='order-list'>
+                                            <tbody class='order-list-contents'></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="rightPanel" style="width:917px;float:left:overflow:hidden">
+                                    <div class='subwindow-container-fix touch-scrollable scrollable-y'>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+             </div>
+        </div>
+    </t>
+    
+    <t t-name="NotesPopup">
+        <div class="modal-dialog" role="dialog">
+            <div class="popup popup-selection">
+                <p class="title">Notes</p>
+                <div class='selection scrollable-y touch-scrollable'>
+                    <textarea name="customerNote" id="customerNote" style="width: 90%;margin: auto;height: 210px;"></textarea>
+                </div>
+                <div class="footer">
+                    <div class="button save">
+                        Save changes
+                    </div>
+                    <div class="button cancel">
+                        Don't save
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    
+    <t t-name="ProfilePopup">
+        <div class="modal-dialog" role="dialog">
+            <div class="popup popup-selection">
+                <p class="title">Profil</p>
+                <div class='selection scrollable-y touch-scrollable'>
+                    <table class="table-profile"><tbody></tbody></table>
+                </div>
+                <div class="footer">
+                    <div class="button cancel">
+                        Close
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    
+</templates>

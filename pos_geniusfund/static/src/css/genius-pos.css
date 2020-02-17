@@ -1,0 +1,218 @@
+.order-container .order-scroller{position:relative}
+
+/* ActionpadWidget */
+.actionpad .set-customer{line-height:48px}
+.ActionpadWidget-user_pastille{float:left;margin-left:-36px;width:46px;height:46px;border-radius:50%;background-size: 120%;background-repeat:no-repeat;background-position:center}
+
+/* OrderSelectorWidget */
+.OrderSelectorWidget-user_pastille{float:left;width:38px;height:38px;border-radius:50%;background-size: 120%;background-repeat:no-repeat;background-position:center;margin: 4px 4px 0 -4px;}
+
+/* Customers list Kanban view */
+.kanban-etiquette{width:410px;background:#FFF; border:1px solid #ced4da;margin:15px 0 0 15px; float:left;border-radius:12px}
+.kanban-etiquette:hover{box-shadow: 2px 2px 2px rgba(0,0,0,.5);}
+.kanban-etiquette .col_1{width:110px;float:left;}
+.kanban-etiquette .col_2{width:280px;float:left;padding:20px 10px}
+.kanban-cust-image{width:100px;height:120px;padding:10px}
+.kanban-cust-image img{max-width:100px;max-height:100px;margin-top:56%}
+.partner_name,.partner_txt div {text-align:left!important;line-height:1.4em}
+.partner_name{font-size:1.2em;font-weight:600;margin-bottom:8px;height:2.4em}
+
+/* ClientDetails */
+.client-details-left, .client-details-right{display:table}
+.client-detail{display:table-row}
+.client-detail span{display:table-cell!important;text-align:left!important;padding:0 3px!important}
+.client-detail span:first-child{width:190px!important;text-align:right!important}
+
+.order{padding:0!important}
+.orderlineTable{font-size:12px!important;display:table!important;}
+.orderlineTable .table-header{background:#000;}
+.orderlineTable .table-header > div{color:#FFF;font-weight:200!important; padding:12px 4px;}
+.orderlineTable div.line-cell{display:table-cell!important;font-weight:200!important;color:#333; padding:12px 4px 6px;vertical-align: top;font-size:.9em!important}
+
+.table-row{display:table-row!important}
+.table-row > div{display:table-cell!important}
+
+.pos .order .orderline .product-name {padding-top: 11px !important;width:auto!important}
+.pos .order {padding-top: 0px !important;}
+.pos .order .orderline .product-name {width:auto!important}
+.pos .order .orderline .info-list {color: #888;margin-left: 10px;padding-bottom: 19px;}
+.pos .order .orderline .product-THC-content{color:#FF0000!important;display:none}
+
+.orderline-btn{float:left;display:block!important;height:40px;width:40px;background:transparent!important;border:none!important;color:#OOO!important;padding:0!important}
+.line-quant{float:left;width:18px;line-height:40px;text-align:center!important}
+
+.txt-right{text-align:right!important}
+.strong{font-weight:600!important}
+
+.pay .achtun-limits{display:none;}
+.pay .achtun-limits .fa{font-size:72px; color:#FF0000;}
+/*.pay .text-btn-payment{font-weight:200!important;font-family: GeniusFont, "Lato","Lucida Grande", Helvetica, Verdana, Arial;line-height:1em!important;font-size:18px;white-space: pre-wrap;/* Since CSS 2.1 white-space: -moz-pre-wrap;/* Mozilla, since 1999 white-space: -pre-wrap;/* Opera 4-6 white-space: -o-pre-wrap;/* Opera 7 word-wrap: break-word;} */
+.pay .text-btn-payment{font-weight:200!important;font-family: GeniusFont, "Lato","Lucida Grande", Helvetica, Verdana, Arial;line-height:1em!important;font-size:18px}
+
+
+.table-profile td {padding:4px 8px!important;text-align:left!important;font-size:13px!important;line-height:1.2em!important}
+.table-profile tr.ineedaline{border-bottom: 1px solid #EBEBEB;}
+.table-profile tr.ineedaline td{padding-bottom:12px!important}
+
+.clientlist-screen .middle-button {display:inline-block;margin-top:12px;padding: 10px 25px!important;border: 1px solid black;color: black;background: #FFF;margin-right:-1px;min-width:85px}
+.clientlist-screen .middle-button:first-child {border-radius:4px 0 0 4px}
+.clientlist-screen .middle-button:last-child {border-radius:0 4px 4px 0}
+.clientlist-screen .button{background: #FFF!important;}
+.pos .clientlist-screen .button.new-customer{left:0!important;}
+.pos .clientlist-screen .searchbox, .return-screen .searchbox{top:0; right:0;left:auto!important;}
+
+.i-want-to-be-red{background-color: #FCF0EF;color:#FF0000;}
+.i-want-to-be-green{background-color:#EBFCF3;color:#00AA69;}
+
+.order-line td{padding:20px 40px}
+.order-line span{width:100%; overflow:hidden; display:block;line-height:1.6em}
+.COL_order, .COL_hour{color:#888;font-weight:200;}
+.order-line.selected td{background-color:#000; color:#FFF!important}
+.order-line.selected .COL_order,.order-line.selected .COL_hour{color:#FFF!important;}
+.pos .order .orderline.selected{
+    background: rgba(140,143,183,0.2)!important;
+}
+
+.customer-orderlines .line-cell{vertical-align:top;font-size:15px!important;padding: 6px 4px;}
+.customer-orderlines .line-cell.txt-right{text-align:right!important}
+
+.input_disabled{
+    border: none !important;
+    background: bottom !important;
+    box-shadow: 0 0 0 0 !important;
+    font-size: 13px!important;
+    height: 13px !important;
+    min-height: 0px !important;
+    line-height: 0px !important;
+    padding: 0!important;
+    color: #171616 !important;
+}
+.input_design{
+    height: 30px !important;
+    min-height: 0px !important;
+    max-width: 100%!important;
+    width: 90% !important;
+    color: #171616 !important;
+    background: #fff;
+    box-shadow: 0px 0px 0px 1px rgb(220,220,220) inset;
+    border: none;
+    border-radius: 5px;
+    font-size: 13px!important;
+    padding: 0 0 0 4px!important;
+}
+.input_design:focus{
+    outline: none;
+    box-shadow: 0px 0px 0px 3px #000;
+}
+.hidden{
+    display: none!important;
+}
+.customer-filter{
+    background: black !important;
+    color: white !important;
+}
+.error{
+    display: table-cell!important;
+    color: red;
+}
+.table-profile-design{
+    width:100%;
+}
+.table-profile-design tbody tr td:first-child{
+    width:25%;
+}
+.table-profile-design tbody tr td:nth-of-type(2){
+    width:75%;
+}
+
+.pos .kanban-etiquette .partner_txt .partner_field_title, .pos .rightpane .current-customer .current-cust-daily-limits .limit-categ, .pos .rightpane .current-customer .current-cust-daily-limits .limit-remaining {
+    font-weight: 400;
+}
+.pos .kanban-etiquette .partner_txt div, .pos .rightpane .current-customer .current-cust-daily-limits .limit-categ {
+    font-size: 16px;
+    line-height: 1.3em;
+}
+.pos .rightpane .current-customer .current-cust-daily-limits .limit-remaining, .pos .rightpane .current-customer .current-cust-daily-limits .used-from-limit {
+    font-size: 14px !important;
+}
+
+.existingNote {
+    width: 94%;
+	float: left;
+    margin-left: 15px;
+    text-align: left;
+    line-height: 20px;
+    border-bottom: solid 1px;
+    border-color: darkgray;
+    word-wrap: break-word;
+}
+
+.customer-flag{
+    float: right;
+    width: 110px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    border-radius: 2px;
+    margin-top: 10px;
+    margin-right: 55px;
+    margin-left: 100px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    display: flex;
+}
+
+.customer-flag .fa.flag-icon {
+    background-repeat: no-repeat;
+    background-size: contain;
+    border: none;
+    height: 100%;
+    background-color: transparent;
+    cursor: default;
+    background-image: url('/pos_geniusfund/static/src/img/Icon_Exclamation_Small_black.svg');
+}
+
+.customer-flag .btn-flag{
+    background: #FAFAFA;
+    border: 1px solid #000;
+    min-width: 40px;
+}
+.customer-flag .btn-flag.unchecked { background-image: none; }
+.customer-flag .btn-flag.checked   { background-image: url('/pos_geniusfund/static/src/img/Icon_Checkmark.svg');min-width: 40px;}
+
+.customer-flag .flag-text {
+    font-size: 15px;
+    font-weight: 400;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.button.black-btn{
+    color: #FFFFFF !important;
+    background: #000000 !important;
+    font-family: GeniusFont, "Lato","Lucida Grande", Helvetica, Verdana, Arial;
+    border-radius: 4px !important;
+}
+.button.white-btn{
+    color: #000000 !important;
+    background: #FFFFFF !important;
+    font-family: GeniusFont, "Lato","Lucida Grande", Helvetica, Verdana, Arial;
+    border-radius: 4px !important;
+}
+
+#customer-flag{
+    display:none;
+    position: absolute;
+    top: 8%;
+    width: 30px;
+    left: 85px;
+}
+.pos .modal-dialog .popup .title {
+    background: transparent !important;
+}
+
+.pos .popup input {
+    caret-color: #FF15CF !important;
+}

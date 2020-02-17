@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="streamline_assets" name="streamline assets">
+        <link rel="stylesheet" type="text/css" href="/pos_geniusfund/static/src/css/streamline.css" id='asset_css'/>
+        <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
+        <script type="text/javascript" src="/web/static/lib/jquery.ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="/web/static/lib/jquery/jquery.browser.js"></script>
+        <script type="text/javascript" src="/web/static/lib/jquery.blockUI/jquery.blockUI.js"></script>
+        <script type="text/javascript" src="/web/static/lib/jquery.hotkeys/jquery.hotkeys.js"></script>
+        <script type="text/javascript" src="/web/static/lib/jquery.placeholder/jquery.placeholder.js"></script>
+        <script type="text/javascript" src="/web/static/lib/jquery.form/jquery.form.js"></script>
+        <script type="text/javascript" src="/web/static/lib/jquery.ba-bbq/jquery.ba-bbq.js"></script>
+        <script type="text/javascript" src="/web/static/lib/jquery.mjs.nestedSortable/jquery.mjs.nestedSortable.js"></script>
+        <script type="text/javascript" src="/pos_geniusfund/static/src/js/streamline.js"></script>
+    </template>
+
+    <template id="streamline_screens" name="Budtender start screen">&lt;!DOCTYPE html&gt;
+        <html>
+            <head>
+                <title>Start streamline process</title>
+                <t t-call-assets="pos_geniusfund.streamline_assets"/>
+            </head>
+
+            <t t-set="option" t-value="null"/>
+            <t t-if="state == 'authentication'" t-set="option" t-value="users_id[0].id" />
+
+            <body class="streamline" t-attf-onload="streamline.init('{{state}}', {{option}});">
+                <div class="">
+
+                    <!-- USER LIST SCREEN -->
+                    <div id="user_list_screen" class="screen">
+                        <div class="title">Genius Team</div>
+
+                        <div class="user_list">
+                            <t t-foreach="users_id" t-as="user">
+                                <div class="user_card"
+                                     t-attf-user_id="{{user.id}}"
+                                     t-attf-user_login="{{user.login}}"
+                                     t-attf-user_name="{{user.name}}">
+                                    <img t-attf-src="data:image/png;base64, {{user.image_medium}}"></img>
+                                    <div><t t-esc="user.name"/></div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- AUTHENTICATION SCREEN -->
+                    <div id="authentication_screen" class="screen">
+                        <div class="left_panel">
+                            <div class='user_login'></div>
+                            <div><img class='user_image'></img></div>
+                            <div class="button back white-btn">Change budtender</div>
+                        </div>
+                        <div class="right_panel">
+                            <div class="title">Enter Passcode</div>
+                            <div class="content">
+                                <div class="pin_code"></div>
+                                <div class="numpad">
+                                    <div class="input-button number-char" data-action='1'>1</div>
+                                    <div class="input-button number-char" data-action='2'>2</div>
+                                    <div class="input-button number-char" data-action='3'>3</div>
+
+                                    <div class="input-button number-char" data-action='4'>4</div>
+                                    <div class="input-button number-char" data-action='5'>5</div>
+                                    <div class="input-button number-char" data-action='6'>6</div>
+
+                                    <div class="input-button number-char" data-action='7'>7</div>
+                                    <div class="input-button number-char" data-action='8'>8</div>
+                                    <div class="input-button number-char" data-action='9'>9</div>
+
+                                    <div class="input-button number-char" data-action='.'>.</div>
+                                    <div class="input-button number-char" data-action='0'>0</div>
+                                    <div class="input-button numpad-backspace" data-action='BACKSPACE' >
+                                        <img src="/point_of_sale/static/src/img/backspace.png" width="24" height="21" alt="Backspace"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="footer">
+                                <div class="button submit black-btn">Submit</div>
+                                <div class="button resend white-btn">Resend Code</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </body>
+        </html>
+    </template>
+</odoo>

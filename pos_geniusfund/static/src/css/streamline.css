@@ -1,0 +1,125 @@
+.streamline .screen {
+    display:none;
+    font-family: Helvetica;
+}
+
+/** USER SCREEN LIST **/
+.streamline .title {
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 50px;
+    margin-top: 50px;
+}
+
+.streamline .user_list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 250px);
+    grid-gap: 15px;
+    justify-content: center;
+}
+
+.streamline .user_card{
+    padding: 5px;
+    text-align: center;
+    background-color: rgb(240,240,240);
+}
+
+/** AUTHENTICATION SCREEN **/
+.streamline #authentication_screen{
+    display: flex;
+}
+
+.streamline #authentication_screen .left_panel {
+    width: 20%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.left_panel div {
+    margin-bottom: 30px;
+}
+
+.streamline #authentication_screen .right_panel {
+    width: 70%;
+    background-color: rgb(250,250,250);
+}
+
+.streamline .button {
+    border: 1px solid #000;
+    text-align: center;
+    /*font-family: GeniusFont, "Lato","Lucida Grande", Helvetica, Verdana, Arial;*/
+    border-radius: 4px;
+    height: 40px;
+    line-height: 40px;
+    padding: 10px;
+    width: 150px;
+}
+
+.streamline .button.white-btn {
+    color: #000;
+    background-color: #FFF;
+}
+
+.streamline .button.black-btn {
+    color: #FFF;
+    background-color: #000;
+}
+
+.streamline #authentication_screen .right_panel .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.streamline #authentication_screen .right_panel .pin_code {
+    line-height: 80px;
+    border: 1px solid lightgray;
+    width: 200px;
+    margin-bottom: 50px;
+    min-height: 80px;
+    background-color: #FFFFFF;
+    text-align: center;
+    font-size: 80px;
+}
+
+.streamline #authentication_screen .right_panel .numpad {
+    display: grid;
+    grid-template-columns: 50px 50px 50px;
+    rid-template-rows: 50px 50px 50px 50px;
+    grid-gap: 10px;
+    justify-content: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.streamline #authentication_screen .right_panel .numpad .input-button {
+    width: 50px;
+    line-height: 50px;
+    border: 1px solid lightgray;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.streamline #authentication_screen .right_panel .numpad .input-button:active {
+    background-color: #222;
+    color: #FFF;
+    border: 1px solid black;
+}
+
+.streamline #authentication_screen .right_panel .numpad img{
+    vertical-align: sub;
+}
+
+.streamline #authentication_screen .right_panel .footer {
+    display: flex;
+    grid-gap: 50px;
+    justify-content: center;
+    margin-top: 50px;
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="index" inherit_id="point_of_sale.index">
+            <xpath expr="//meta[@name='viewport']" position="replace">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>
