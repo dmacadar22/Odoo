@@ -131,7 +131,7 @@ class ProductProduct(models.Model):
 
 class StockMove(models.Model):
     _inherit = "stock.move"
-       def product_price_update_before_done(self, forced_qty=None):
+    def product_price_update_before_done(self, forced_qty=None):
         tmpl_dict = defaultdict(lambda: 0.0)
         # adapt standard price on incomming moves if the product cost_method is 'average'
         std_price_update = {}
