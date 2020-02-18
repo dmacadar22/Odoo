@@ -166,6 +166,6 @@ class StockMove(models.Model):
 
         self.env['product.history.tracking'].create(data_history)
             
-            # Write the standard price, as SUPERUSER_ID because a warehouse manager may not have the right to write on products
-            move.product_id.with_context(force_company=move.company_id.id).sudo().write({'standard_price': new_std_price})
-            std_price_update[move.company_id.id, move.product_id.id] = new_std_price
+        # Write the standard price, as SUPERUSER_ID because a warehouse manager may not have the right to write on products
+        move.product_id.with_context(force_company=move.company_id.id).sudo().write({'standard_price': new_std_price})
+        std_price_update[move.company_id.id, move.product_id.id] = new_std_price
