@@ -153,19 +153,19 @@ class StockMove(models.Model):
                 new_std_price = ((amount_unit * product_tot_qty_available) + (move._get_price_unit() * qty)) / (product_tot_qty_available + qty)
 
             tmpl_dict[move.product_id.id] += qty_done
-			
-	    data_history = {
-		    'standard_price' : new_std_price,
-		    'previous_standard_price' : move.product_id.standard_price,
-		    'list_price' : move.product_id.list_price, #Maintaining consistency; this value is updated through an automated action
-		    'previous_list_price' : move.product_id.list_price, #See above
-		    'modified_datetime' : datetime.now(),
-		    'product' : move.product_id.product_tmpl_id.id,
-		    'user' : self.env.user.id
-	    }
+            
+        data_history = {
+            'standard_price' : new_std_price,
+            'previous_standard_price' : move.product_id.standard_price,
+            'list_price' : move.product_id.list_price, #Maintaining consistency; this value is updated through an automated action
+            'previous_list_price' : move.product_id.list_price, #See above
+            'modified_datetime' : datetime.now(),
+            'product' : move.product_id.product_tmpl_id.id,
+            'user' : self.env.user.id
+        }
 
-	    self.env['product.history.tracking'].create(data_history)
-			
+        self.env['product.history.tracking'].create(data_history)
+            
             # Write the standard price, as SUPERUSER_ID because a warehouse manager may not have the right to write on products
             move.product_id.with_context(force_company=move.company_id.id).sudo().write({'standard_price': new_std_price})
             std_price_update[move.company_id.id, move.product_id.id] = new_std_price
