@@ -116,7 +116,7 @@ class ProductProduct(models.Model):
             'standard_price' : new_price,
             'previous_standard_price' : self.standard_price,
             'list_price' : self.list_price, #Maintaining consistency; this value is updated through an automated action
-            'previous_list_price' : self.list_price, #See above
+            'previous_list_price' : self.list_price, #See above 
             'modified_datetime' : datetime.now(),
             'product' : self.product_tmpl_id.id,
             'user' : self.env.user.id
