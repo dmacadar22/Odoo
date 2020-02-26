@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vim:fdl=1:
+-->
+<templates xml:space="preserve">
+    <t t-name="templatebarcode">
+        <table>
+            <tbody>
+                <tr id="barcode1">
+                    <td style='padding:2px 2px 2px 0px; text-align:center;'>
+                        <div id="xml_receipt_barcode" t-att-class='barcode' style="width:300px!important"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </t>
+    <t t-extend="PosTicket">
+        <t t-jquery=".pos-center-align" t-operation="before">
+            <t t-if="widget.pos.company_logo_base64">
+                <div style="width:100%;height:auto;text-align:center;padding: 2em 0;">
+                    <img t-att-src="widget.pos.company_logo_base64" style="max-height:100px;max-width:180px"/>
+                </div>
+                <br/>
+            </t>
+        </t>
+        <t t-jquery=".receipt-change" t-operation="after">
+            <br/>
+            <table>
+                <tbody>
+                    <tr id="barcode1">
+                        <td style='padding:20px 2px 2px 0px; text-align:center;'>
+                            <div id="barcode_div" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </t>
+    </t>
+    <t t-extend="XmlReceipt">
+        <t t-jquery=".before-footer" t-operation="after">
+           <t t-if='receipt.barcode_src' > 
+               <img t-att-src="receipt.barcode_src" style="height:75px!important;max-width:300px!important;margin:auto" />
+            </t>
+        </t>
+    </t>
+</templates>
