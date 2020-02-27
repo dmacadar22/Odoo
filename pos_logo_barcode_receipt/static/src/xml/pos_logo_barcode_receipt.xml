@@ -39,6 +39,7 @@
         <t t-jquery=".before-footer" t-operation="after">
            <t t-if='receipt.barcode_src' >
                <img t-att-src="receipt.barcode_src" style="height:75px!important;max-width:300px!important;margin:auto" />
+               <p t-esc="receipt.barcode_src"/>
             </t>
         </t>
     </t>
