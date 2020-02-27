@@ -42,7 +42,7 @@
                         <field name="show_discount_in_receipt"/>
                     </div>
                     <div class="o_setting_right_pane">
-                        <label for="show_discount_in_receipt"/>
+                        <label for="show_barcode_in_receipt"/>
                     </div>
                 </div>
 
