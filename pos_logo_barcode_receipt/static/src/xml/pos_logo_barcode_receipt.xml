@@ -2,6 +2,12 @@
 <!-- vim:fdl=1:
 -->
 <templates xml:space="preserve">
+    <t t-extend="Chrome">
+        <t t-jquery=".pos-logo" t-operation="replace">
+          <img t-att-src="widget.pos.company.logo" alt="Paradise Health and Nutrition"/>
+        </t>
+    </t>
+
     <t t-name="templatebarcode">
         <table>
             <tbody>
