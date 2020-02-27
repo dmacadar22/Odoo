@@ -7,7 +7,7 @@ odoo.define('pos_logo_barcode_receipt.pos_logo_barcode_receipt', function (requi
     var devices = require('point_of_sale.devices');
     var QWeb = core.qweb;
     var _t = core._t;
-    
+
     var _super_order = models.Order.prototype;
     models.Order = models.Order.extend({
         initialize: function(attributes,options) {
@@ -30,7 +30,7 @@ odoo.define('pos_logo_barcode_receipt.pos_logo_barcode_receipt', function (requi
                 });
                 $(barcodeTemplate).find('#xml_receipt_barcode').barcode(barcode_val.toString(), "code128");
                 if(_.isElement($(barcodeTemplate).find('#xml_receipt_barcode').barcode(barcode_val.toString(), "code128")[0])){
-                    if($(barcodeTemplate).find('#xml_receipt_barcode').barcode(barcode_val.toString(), "code128")[0].firstChild != undefined 
+                    if($(barcodeTemplate).find('#xml_receipt_barcode').barcode(barcode_val.toString(), "code128")[0].firstChild != undefined
                             && $(barcodeTemplate).find('#xml_receipt_barcode').barcode(barcode_val.toString(), "code128")[0].firstChild.data != undefined){
                         barcode_src = $(barcodeTemplate).find('#xml_receipt_barcode').barcode(barcode_val.toString(), "code128")[0].firstChild.data;
                     }
@@ -46,7 +46,7 @@ odoo.define('pos_logo_barcode_receipt.pos_logo_barcode_receipt', function (requi
             return this.get('pos_reference')
         },
     });
-    
+
     screens.ReceiptScreenWidget.include({
         show: function(){
             this._super();

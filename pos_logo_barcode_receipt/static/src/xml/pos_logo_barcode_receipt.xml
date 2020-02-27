@@ -14,7 +14,6 @@
                 <tr id="barcode1">
                     <td style='padding:2px 2px 2px 0px; text-align:center;'>
                         <div id="xml_receipt_barcode" t-att-class='barcode' style="width:300px!important"/>
-                        <p>template barcode</p>
                     </td>
                 </tr>
             </tbody>
@@ -36,7 +35,6 @@
                     <tr id="barcode1">
                         <td style='padding:20px 2px 2px 0px; text-align:center;'>
                             <div id="barcode_div" />
-                            <p>barcode div</p>
                         </td>
                     </tr>
                 </tbody>
@@ -48,7 +46,6 @@
            <t t-if='receipt.barcode_src' >
                <img t-att-src="receipt.barcode_src" style="height:75px!important;max-width:300px!important;margin:auto" />
                <p t-esc="receipt.barcode_src"/>
-               <p>barcode xml receipt</p>
             </t>
         </t>
     </t>
