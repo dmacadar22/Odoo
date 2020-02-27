@@ -4,7 +4,7 @@
 <templates xml:space="preserve">
     <t t-extend="Chrome">
         <t t-jquery=".pos-logo" t-operation="replace">
-          <img t-att-src="widget.pos.company_logo_base64" alt="Paradise Health and Nutrition"/>
+          <img t-att-src="widget.pos.company_logo_base64" alt="Paradise Health and Nutrition" class="pos-logo" style="margin-top: 7px;"/>
         </t>
     </t>
 
