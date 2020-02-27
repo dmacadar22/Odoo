@@ -20,14 +20,14 @@
         </table>
     </t>
     <t t-extend="PosTicket">
-        <!-- <t t-jquery=".pos-center-align" t-operation="before">
+        <t t-jquery=".pos-center-align" t-operation="before">
             <t t-if="widget.pos.company_logo_base64">
                 <div style="width:100%;height:auto;text-align:center;padding: 2em 0;">
                     <img t-att-src="widget.pos.company_logo_base64" style="max-height:100px;max-width:180px"/>
                 </div>
                 <br/>
             </t>
-        </t> -->
+        </t>
         <t t-jquery=".receipt-change" t-operation="after">
             <br/>
             <table>
