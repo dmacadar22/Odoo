@@ -27,7 +27,7 @@ class PosConfig(models.Model):
                                               help="Check box if you want to display the discount "
                                                    "of the orderline on the ticket")
 
-   show_barcode_in_receipt = fields.Boolean(string="Show barcode in receipt", default=True,
+    show_barcode_in_receipt = fields.Boolean(string="Show barcode in receipt", default=True,
                                           help="Check box if you want to display the barcode "
                                                "of the ticket")
 
