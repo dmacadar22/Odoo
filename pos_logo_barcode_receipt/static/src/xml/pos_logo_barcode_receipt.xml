@@ -67,7 +67,7 @@
           </div> -->
           <div class="receipt-user">
               User: <t t-esc="widget.pos.get_cashier().name"/><br />
-              Register: <t t-esc="widget.get_name()"/><br />
+              Register: <t t-esc="widget.pos.user.name"/><br />
           </div>
           <br />
           <table class='receipt-orderlines'>
