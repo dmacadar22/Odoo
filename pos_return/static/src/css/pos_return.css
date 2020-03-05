@@ -1,0 +1,113 @@
+.selection-area {
+    height: 32px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#7B7979), to(#393939));
+    background: -moz-linear-gradient(#7B7979, #393939);
+    background:  -ms-linear-gradient(#7B7979, #393939);
+    background:      linear-gradient(#7B7979, #393939);
+}
+
+.button_select {
+    border: 1px solid #AAA; 
+    color: #FFF; 
+    background: #666; 
+    margin-left: 5px; 
+    margin-right: 5px; 
+    cursor: pointer; 
+    padding: 2px 4px; 
+    border-radius: 4px; 
+    text-decoration: none;
+    font-size: 15px;
+}
+
+.label {
+    color: #555 !important;
+}
+
+.pos .searchbox input {
+    width: 175px;
+    border: 1px solid #cecbcb;
+    padding: 10px 20px;
+    padding-left: 38px;
+    margin: 6px;
+    background: url("../img/search.png") no-repeat 15px;
+    background-color: white;
+    border-radius: 20px;
+    font-family: Lato;
+    font-size: 13px;
+}
+
+.pos .breadcrumb {
+    display: inline-block !important;
+    float: left !important;
+    height: 48px !important;
+    line-height: 48px !important;
+    min-width: 48px !important;
+    background-color: #d3d3d3;
+    padding: 0px !important;
+}
+.product .remaining-qty-tag {
+    position: absolute;
+    top: 2px;
+    left: 0px;
+    vertical-align: top;
+    color: white;
+    line-height: 13px;
+    background: #7f82ac;
+    padding: 2px 5px;
+    border-radius: 3px;
+    box-shadow: 0px 1px 0px #9A9CC5, 0px 3px 0px #7E86AC, 0px 3px 3px rgba(12, 14, 68, 0.67);
+}
+.pos-return-popup{
+	height:80% !important;
+	width:70% !important;
+}
+#return_order_number{
+	width: 35% !important;
+    font-size: 14px;
+}
+.content{
+	margin-left: 5%;
+}
+.item_remain_qty {
+    position: absolute;
+	top: 0px;
+	left: 0;
+	vertical-align: top;
+	color: white;
+	line-height: 15px;
+	padding: 0px 5px;
+	border-radius: 2px;
+	width: 10px;
+	background: #7f82ac;
+	height: 15px;
+}
+.js_quantity{
+	min-height: 0px !important;
+	height: 24px !important;
+	font-size: 14px !important;
+	padding: 0px !important;
+	text-align: center !important;
+	width: 60% !important;
+}
+.ac_product_list{
+	max-height: 310px !important;
+	overflow-y: auto;
+}
+.product_content{
+	height: 140px !important;
+	width: 150px !important;
+}
+.product_content .product-img{
+	height: 100% !important;
+	width: 100% !important;
+}
+.scrap_icon{
+	position: absolute;
+	left: 1px;
+	margin-top: 7px;
+	font-size: 15px;
+	color: red;
+}
+.select_item{
+	border: 3px solid #6EC89B !important;
+}

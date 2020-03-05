@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-extend="ProductScreenWidget">
+        <t t-jquery="tr.header-row" t-operation="before">
+        	<t t-if="widget.pos.config.enable_pos_return">
+	            <tr class="selection-area">
+	                <td style="padding-left: 5px;text-align:left;">
+	                    <span class='button_select' id="sale_mode" style="background: blue;">
+	                       Sale Mode
+	                    </span>
+	                    <span class='button_select' id="missing_return_order">
+	                       Missing Order Receipt
+	                    </span>
+	                    <span class='button_select' id="return_order">
+	                       Return Mode
+	                    </span>
+	                    <span id="return_order_ref" style="color: #FFF;font-size:16px;">
+	                    </span>
+	                </td>
+	            </tr>
+            </t>
+        </t>
+    </t>
+
+    <t t-extend="Product">
+        <t t-jquery="img" t-operation="before">
+            <span class="remaining-qty-tag" style="display:none;">
+            </span>
+        </t>
+    </t>
+
+    <t t-extend="PosTicket">
+    	<t t-jquery="table:last" t-operation="after">
+            <br/><table style="margin-left: 48px;"><tbody><tr id="barcode1"></tr></tbody></table>
+		</t>
+	</t>
+	<t t-name="PosReturnOrder">
+        <div class="modal-dialog">
+            <div class="popup popup-textinput pos-return-popup">
+                <p class="title">Return Order</p>
+                <div align="left" class="content">
+                	<input type="text" id="return_order_number" placeholder="Scan barcode of Order"/>
+                </div>
+                <br />
+                 <div class="ac_product_list">
+                    <t t-if='widget.lines'>
+                        <t t-foreach='widget.lines' t-as='line'>
+                        	<t t-set="product" t-value="widget.pos.db.get_product_by_id(line.product_id[0])" />
+                            <span class='product product_content' t-att-data-product-id="product.id" t-att-data-line-id="line.id">
+	                            <div class="product-img">
+	                                <img t-att-src='widget.get_product_image_url(product.id)' />
+	                                <t t-if="!product.to_weight">
+	                                    <span class="price-tag">
+	                                        <t t-esc="widget.format_currency(line.price_unit,'Product Price')" />
+	                                    </span>
+	                                </t>
+	                                <t t-if="product.to_weight">
+	                                    <span class="price-tag">
+	                                        <t t-esc="widget.format_currency(line.price_unit,'Product Price')+'/Kg'" />
+	                                    </span>
+	                                </t>
+	                                <span class="item_remain_qty">
+	                                    <t t-esc="line.return_qty" />
+	                                </span>
+	                            </div>
+	                            <div class="product-name">
+<!-- 	                                Qty: <input t-att-class="'product_qty'+product.id" type="text" size="3" id="product_qty_cs" /> -->
+										<div class="qty_buttons">
+											<!-- return product qty -->
+											<div class="input-group oe_website_spinner return_product" style="margin: auto">
+	                                            <span class="input-group-addon">
+	                                                <a t-attf-href="#" class="mb8 js_return_qty">
+	                                                    <i class="fa fa-minus"></i>
+	                                                </a>
+	                                            </span>
+	                                            <input type="text" class="js_quantity return_product_qty form-control" data-min="0"
+	                                            	t-att-data-max="line.return_qty" t-att-name="line.id" t-att-value="0" t-att-data-total-qty="line.return_qty"/>
+	                                            <span class="input-group-addon">
+	                                                <a t-attf-href="#" class="mb8 float_left js_return_qty">
+	                                                    <i class="fa fa-plus"></i>
+	                                                </a>
+	                                            </span>
+	                                        </div>
+	                                        <!-- scrap product qty -->
+	                                        <div class="input-group oe_website_spinner return_scrap" style="margin: auto; margin-top: 5px;">
+	                                        	<span class="scrap_icon"><i class="fa fa-trash-o" aria-hidden="true"></i></span>
+	                                            <span class="input-group-addon">
+	                                                <a t-attf-href="#" class="mb8 js_scrap_qty">
+	                                                    <i class="fa fa-minus"></i>
+	                                                </a>
+	                                            </span>
+	                                            <input type="text" class="js_quantity scrap_product_qty form-control" data-min="0" t-att-data-total-qty="line.return_qty"
+	                                            	t-att-data-max="line.return_qty" t-att-name="line.id" t-att-value="0"/>
+	                                            <span class="input-group-addon">
+	                                                <a t-attf-href="#" class="mb8 float_left js_scrap_qty">
+	                                                    <i class="fa fa-plus"></i>
+	                                                </a>
+	                                            </span>
+	                                        </div>
+                                        </div>
+                                        <t t-esc="product.display_name" />
+	                            </div>
+                        	</span>
+                    	</t>
+                	</t>
+                 </div>
+                <div class="footer">
+                	<div style="float: left;margin-top: 20px;margin-left: 20px;">
+                		<i class="fa fa-trash-o" aria-hidden="true" style="color: red"></i>
+                		<span style="font-size: 15px; margin-left: 10px;">Scrap Quantity</span>
+                	</div>
+                    <div class="button confirm">
+                        Validate
+                    </div>
+                    <div class="button cancel">
+                        Cancel
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-extend="XmlReceipt">
+    	 <t t-jquery="receipt" t-operation="append">
+    	 	<br/>
+             <t t-if='receipt.order_no'>
+                <br/>
+                    <barcode encoding="CODE39">*<t t-esc='receipt.order_no' />*</barcode>
+                <br/>
+              </t>
+    	 </t>
+    </t>
+	<t t-extend="Orderline">
+        <t t-jquery="ul.info-list li:first" t-operation="append">
+            <t t-if="line.get_scrap_item()">
+                <li class="info">
+                    Scrap Item
+                </li>
+            </t>
+        </t>
+    </t>
+</templates>

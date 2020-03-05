@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="index" name="pos_return index" inherit_id="point_of_sale.index">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/pos_return/static/src/js/pos_return.js"></script>
+                <script type="text/javascript" src="/pos_return/static/src/js/jquery-barcode.js"></script>
+	        	<link rel="stylesheet" href="/pos_return/static/src/css/pos_return.css" id="pos-stylesheet"/>
+	        </xpath>
+	    </template>
+
+    </data>
+</odoo>
