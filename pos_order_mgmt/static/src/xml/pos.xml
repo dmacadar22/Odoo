@@ -18,7 +18,7 @@
                         Back
                     </span>
                     <span class='searchbox'>
-                        <input placeholder='Search Order' />
+                        <input placeholder='Search Order'  />
                         <span class='search-clear'></span>
                     </span>
                     <span class='searchbox'></span>
@@ -76,7 +76,7 @@
         </t>
     </t>
 
-    <t t-extend="PosTicket">
+<!--    <t t-extend="PosTicket">
         <t t-jquery="t[t-esc='order.name']" t-operation="after">
             <t t-if="order.returned_order_id">
                 <br/>
@@ -90,7 +90,7 @@
                 <br/>
             </t>
         </t>
-    </t>
+    </t>-->
 
     <t t-extend="XmlReceipt">
         <t t-jquery=".orderlines" t-operation="before">

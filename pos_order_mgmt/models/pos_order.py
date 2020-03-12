@@ -92,11 +92,12 @@ class PosOrder(models.Model):
         condition = self._prepare_filter_for_pos(pos_session_id)
         if not query:
             # Search only this POS orders
-            condition += [('config_id', '=', config.id)]
+            condition += [('config_id', '=', config.id),('returned_order_id','=',False)]
         else:
             # Search globally by criteria
             condition += self._prepare_filter_query_for_pos(
                 pos_session_id, query)
+            condition += [('config_id', '=', config.id),('returned_order_id','=',False)]
         field_names = self._prepare_fields_for_pos_list()
         return self.search_read(
             condition, field_names, limit=config.iface_load_done_order_max_qty)
