@@ -237,7 +237,6 @@ class pos_order(models.Model):
         orders_to_save = [o for o in orders if o['data']['name'] not in existing_references]
 
         order_ids = []
-
         for tmp_order in orders_to_save:
             to_invoice = tmp_order['to_invoice']
             order = tmp_order['data']

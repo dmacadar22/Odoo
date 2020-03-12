@@ -6,18 +6,7 @@
     background:      linear-gradient(#7B7979, #393939);
 }
 
-.button_select {
-    border: 1px solid #AAA; 
-    color: #FFF; 
-    background: #666; 
-    margin-left: 5px; 
-    margin-right: 5px; 
-    cursor: pointer; 
-    padding: 2px 4px; 
-    border-radius: 4px; 
-    text-decoration: none;
-    font-size: 15px;
-}
+
 
 .label {
     color: #555 !important;

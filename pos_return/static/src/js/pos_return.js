@@ -4,8 +4,10 @@ odoo.define('pos_return.pos_return', function (require) {
 	var core = require('web.core');
 	var utils = require('web.utils');
 	var rpc = require('web.rpc');
+	var PosBaseWidget = require('point_of_sale.BaseWidget');
 	var screens = require('point_of_sale.screens');
 	var gui = require('point_of_sale.gui');
+	var chrome = require('point_of_sale.chrome');
 	var models = require('point_of_sale.models');
 	var PopupWidget = require('point_of_sale.popups');
 
@@ -14,6 +16,135 @@ odoo.define('pos_return.pos_return', function (require) {
     var round_di = utils.round_decimals;
     var round_pr = utils.round_precision;
 
+//    For Showing the Returns Button in POS Screen
+    var ListOrderreturnWidget = PosBaseWidget.extend({
+        template: 'ListOrderreturnWidget',
+        init: function (parent, options) {
+            var opts = options || {};
+            this._super(parent, opts);
+            this.action = opts.action;
+            this.label = opts.label;
+        },
+    })
+//    Pop up Screen For listing the Orders
+    var PosReturnOrderList = PopupWidget.extend({
+        template: 'PosReturnOrderList',
+        init: function(parent, args) {
+	    	var self = this;
+	        this._super(parent, args);
+	        this.options = {};
+	        this.line = [];
+	    },
+//       Events for Search(Keyup and focus)
+	    events: {
+            'keyup .searchbox input':  'search_orderlist',
+            'focus .searchbox input': 'search_orderlistfocus',
+            'click .cancel_new' : 'click_cancel_close',
+        },
+        click_cancel_close: function(){
+	    	this.gui.close_popup();
+	    },
+
+//        Open the Keyborad on focus
+        search_orderlistfocus:function(){
+            var self = this
+            if (self.pos.config.iface_vkeyboard &&
+                self.chrome.widget.keyboard) {
+                self.chrome.widget.keyboard.connect(
+                    self.$('.searchbox input'));
+            }
+        },
+//        Search the Order on Keypress
+        search_orderlist: function(){
+            var self = this
+            var search_timeout = null;
+            this.search_query = $("#search_string").val();
+            clearTimeout(search_timeout);
+            search_timeout = setTimeout(function () {
+              self.perform_search();
+            }, 70);
+            self.$('.searchbox .search-clear').click(function () {
+              //  self.clear_search();
+            });
+        },
+        search_done_orders: function (query) {
+            var self = this;
+            return this._rpc({
+                model: 'pos.order',
+                method: 'search_done_orders_for_pos',
+                args: [query || '', this.pos.pos_session.id],
+
+            }).then(function (result) {
+                self.orders = result;
+                var contents;
+                var orders = []
+                contents = self.$el[0].querySelector('.ac_product_list');
+                contents.innerHTML = ''
+                $('.ac_product_list').append("<div style='width:100%;display:inline-block;'><div style='width:90%;display:block;margin:0px auto;'><div class='' style='cursor:pointer;'><div style='width:25%;float:left;'><p class='order_pos_reference' style='font-size: 16px;line-height: 40px;'><span class=order_pos_ref'>Ref.</span></p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'><span>Customer</span></p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'>Date</p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'>Amount</p></div></div></div></div>")
+                _.each(self.orders, function (order) {
+                    if($(order)[0]['partner_id'])
+                    {
+                        $('.ac_product_list').append("<div style='width:100%;display:inline-block;'><div style='width:90%;display:block;margin:0px auto;'><div class='order_reference' style='cursor:pointer;'><div style='width:25%;float:left;'><p class='order_pos_reference' style='font-size: 16px;line-height: 40px;'><span class='order_pos_ref'>"+ $(order)[0]['pos_reference'] +"</span></p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'><span>"+$(order)[0]['partner_id']+"</span></p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'>"+$(order)[0]['date_order']+"</p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'>"+self.format_currency($(order)[0]['amount_total'])+"</p></div></div></div></div>")
+                    }
+                    else
+                    {
+                        $('.ac_product_list').append("<div style='width:100%;display:inline-block;'><div style='width:90%;display:block;margin:0px auto;'><div class='order_reference' style='cursor:pointer;'><div style='width:25%;float:left;'><p class='order_pos_reference' style='font-size: 16px;line-height: 40px;'><span class='order_pos_ref'>"+ $(order)[0]['pos_reference'] +"</span></p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'><span></span></p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'>"+$(order)[0]['date_order']+"</p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'>"+self.format_currency($(order)[0]['amount_total'])+"</p></div></div></div></div>")
+                    }
+                });
+                var order_pos_ref = $(".order_reference")
+                if($(order_pos_ref).length)
+                    {
+                        $(".order_reference").click(function(){
+                        var close_button = $(".close_button")
+                            if($(close_button).length)
+                            {
+                                $(".keyboard_frame").css("display","none")
+                            }
+                            var order_ref = $(this).find(".order_pos_ref").text();
+                            if(order_ref.length)
+                            {
+                                self.gui.show_popup('pos_return_order');
+                                var order_ref_val = $("#return_order_number").val(order_ref)
+                                if($(order_ref_val).length)
+                                {
+                                    var e = $.Event( "keypress", { which: 13 } );
+                                    $('#return_order_number').trigger(e);
+                                }
+                            }
+                        })
+                    }
+                var search_res = $("#search_string").val()
+            }).fail(function (error, event) {
+                if (parseInt(error.code, 10) === 200) {
+                    // Business Logic Error, not a connection problem
+                    self.gui.show_popup(
+                        'error-traceback', {
+                            'title': error.data.message,
+                            'body': error.data.debug,
+                        }
+                    );
+                } else {
+                    self.gui.show_popup('error', {
+                        'title': _t('Connection error'),
+                        'body': _t(
+                            'Can not execute this action because the POS' +
+                            ' is currently offline'),
+                    });
+                }
+                event.preventDefault();
+            });
+        },
+        perform_search: function () {
+            var self = this;
+            return this.search_done_orders(self.search_query)
+                .done(function () {
+                });
+        },
+        click_cancel: function(){
+	    	this.gui.close_popup();
+	    },
+    })
+//    Load the Products for return and Scrap Qty based on Order
     var PosReturnOrder = PopupWidget.extend({
 	    template: 'PosReturnOrder',
 	    init: function(parent, args) {
@@ -95,6 +226,7 @@ odoo.define('pos_return.pos_return', function (require) {
 	                                    self.renderElement();
                                 	} else {
                                 		alert(_t("No item found"));
+                                		self.gui.current_popup.close();
                                 	}
                                 });
                         	} else {
@@ -135,14 +267,12 @@ odoo.define('pos_return.pos_return', function (require) {
 	    	} else {
 	    		$elem.addClass('select_item')
 	    	}
-
 	    },
+	    auto_back: true,
 	    show: function(options){
 	    	var self = this;
-	        options = options || {};
+	    	options = options || {};
 	        this._super(options);
-	        $("span#sale_mode").css('background', '');
-	        $("span#return_order").css('background', 'blue');
 	        this.renderElement();
 	        $("input#return_order_number").focus();
 	        $('.ac_product_list').empty();
@@ -152,6 +282,7 @@ odoo.define('pos_return.pos_return', function (require) {
 	    	var selectedOrder = this.pos.get_order();
 	    	if(selectedOrder.get_ret_o_id()){
 	    		if($('.select_item').length > 0){
+//	    		Loop for return items
 		            _.each($('.select_item'), function(item){
 	            		var orderline = self.line[$(item).data('line-id')];
 	            		var input_val = $(item).find('input.return_product_qty[name='+orderline.id+']').val()
@@ -161,6 +292,10 @@ odoo.define('pos_return.pos_return', function (require) {
 		                    line.set_quantity($('input[name="'+orderline.id+'"').val() * -1);
 		                    line.set_unit_price(orderline.price_unit);
 		                    line.set_oid(orderline.order_id);
+		                    selectedOrder.returned_order_reference = selectedOrder.get_ret_o_ref()
+		                    selectedOrder.returned_order_id = selectedOrder.get_ret_o_id()
+		                    line.returned_order_reference = selectedOrder.get_ret_o_ref()
+		                    line.returned_order_id = selectedOrder.get_ret_o_id()
 		                    if(orderline.discount){
 		                    	line.set_discount(orderline.discount);
 		                    }
@@ -168,6 +303,7 @@ odoo.define('pos_return.pos_return', function (require) {
 		                    selectedOrder.add_orderline(line);
 	            		}
 		            });
+//		            Loop For Scrap Items
 		            _.each($('.select_item'), function(item){
 	            		var orderline = self.line[$(item).data('line-id')];
 	            		var input_val = $(item).find('input.scrap_product_qty[name='+orderline.id+']').val()
@@ -178,6 +314,10 @@ odoo.define('pos_return.pos_return', function (require) {
 		                    line.set_unit_price(orderline.price_unit);
 		                    line.set_oid(orderline.order_id);
 		                    line.set_back_order(selectedOrder.get_ret_o_ref());
+		                    selectedOrder.returned_order_reference = selectedOrder.get_ret_o_ref()
+		                    selectedOrder.returned_order_id = selectedOrder.get_ret_o_id()
+		                    line.returned_order_reference = selectedOrder.get_ret_o_ref()
+		                    line.returned_order_id = selectedOrder.get_ret_o_id()
 		                    if(orderline.discount){
 		                    	line.set_discount(orderline.discount);
 		                    }
@@ -194,12 +334,9 @@ odoo.define('pos_return.pos_return', function (require) {
 		    	$("input#return_order_number").focus();
 		    	alert(_t('Please press enter to view order'));
 	    	}
+
 	    },
 	    click_cancel: function(){
-	    	$("span#sale_mode").css('background', 'blue');
-	        $("span#return_order").css('background', '');
-	        $("span#missing_return_order").css('background', '');
-	        $("span#sale_mode").trigger('click');
 	    	this.gui.close_popup();
 	    },
 	    get_product_image_url: function(product_id){
@@ -212,72 +349,138 @@ odoo.define('pos_return.pos_return', function (require) {
             this.$('div.content').delegate('#return_order_number','keypress', this.keypress_order_number);
             this.$('div.input-group').delegate('.js_quantity','input', this.keydown_qty);
             this.$('.ac_product_list').delegate('.product-img','click', this.select_item);
-    	}
+    	},
+
 	});
 	gui.define_popup({name:'pos_return_order', widget: PosReturnOrder});
+	gui.define_popup({name:'pos_return_order_list', widget: PosReturnOrderList});
 
     screens.ProductScreenWidget.include({
         init: function() {
             this._super.apply(this, arguments);
         },
+
         start:function(){
             var self = this;
             this._super();
             var selectedOrder = self.pos.get_order();
             $('#return_order_ref').html('');
-
             $("span#return_order").click(function() {
-                $("span#return_order").css('background', 'blue');
-                $("span#sale_mode").css('background', '');
-                $("span#missing_return_order").css('background', '');
                 selectedOrder = self.pos.get_order();
-                selectedOrder.set_sale_mode(false);
-                selectedOrder.set_missing_mode(false);
-                self.gui.show_popup('pos_return_order');
-            });
+                self.search_query = false;
+                self.perform_search();
+                self.render_list();
+            })
 
-            $("span#sale_mode").click(function(event) {
-                var selectedOrder = self.pos.get_order();
-                var id = $(event.target).data("category-id");
-                selectedOrder.set_ret_o_id('');
-                selectedOrder.set_sale_mode(true);
-                selectedOrder.set_missing_mode(false);
-                var category = self.pos.db.get_category_by_id(id);
-                self.product_categories_widget.set_category(category);
-                self.product_categories_widget.renderElement();
-
-                $("span#sale_mode").css('background', 'blue');
-                $("span#return_order").css('background', '');
-                $("span#missing_return_order").css('background', '');
-                selectedOrder.set_ret_o_ref('');
-                $('#return_order_ref').html('');
-                $("span.remaining-qty-tag").css('display', 'none');
-            });
-
-            $("span#missing_return_order").click(function(event) {
-                var selectedOrder = self.pos.get_order();
-                var id = $(event.target).data("category-id");
-                selectedOrder.set_sale_mode(false);
-                selectedOrder.set_missing_mode(true);
-                var category = self.pos.db.get_category_by_id(id);
-                self.product_categories_widget.set_category(category);
-                self.product_categories_widget.renderElement();
-
-                $("span#sale_mode").css('background', '');
-                $("span#return_order").css('background', '');
-                $("span#missing_return_order").css('background', 'blue');
-                selectedOrder.set_ret_o_ref('Missing Receipt');
-                $('#return_order_ref').html('Missing Receipt');
-                $("span.remaining-qty-tag").css('display', 'none');
+         },
+//        Rendered the Search Result of Orders
+        render_list: function () {
+            var self = this;
+            var selectedOrder = self.pos.get_order();
+            var order_pos_config = selectedOrder['pos']['pos_session']['config_id'][0]
+            var order_pos_user = selectedOrder['pos']['pos_session']['user_id'][0]
+            rpc.query({
+                      model: 'pos.order',
+                      method: 'search_done_orders_for_pos',
+                      args: ['', this.pos.pos_session.id],
+                      domain: [['user_id', '=', order_pos_user],['config_id', '=', order_pos_config],['returned_order_id', '=', false]],
+            }).then(function(params) {
+               if(params && params.length > 0){
+                    var lines = [];
+                    _.each(params,function(r) {
+                        lines.push(r);
+                    });
+                    self.lines = lines;
+                    self.gui.show_popup('pos_return_order_list',{lines:lines})
+                    var order_pos_ref = $(".order_reference")
+                    if($(order_pos_ref).length)
+                    {
+                        $(".order_reference").click(function(){
+                            var close_button = $(".close_button")
+                            if($(close_button).length)
+                            {
+                                $(".keyboard_frame").css("display","none")
+                            }
+                            var order_ref = $(this).find(".order_pos_ref").text();
+                            if(order_ref.length)
+                            {
+                                self.gui.show_popup('pos_return_order');
+                                var order_ref_val = $("#return_order_number").val(order_ref)
+                                if($(order_ref_val).length)
+                                {
+                                    var e = $.Event( "keypress", { which: 13 } );
+                                    $('#return_order_number').trigger(e);
+                                }
+                            }
+                        })
+                    }
+               }
+               else {
+                        self.gui.show_popup('pos_return_order');
+               }
+            })
+        },
+   	     // Search Part
+        search_done_orders: function (query) {
+            var self = this;
+            return this._rpc({
+                model: 'pos.order',
+                method: 'search_done_orders_for_pos',
+                args: [query || '', this.pos.pos_session.id],
+            }).then(function (result) {
+                self.orders = result;
+                // Get the date in local time
+                _.each(self.orders, function (order) {
+                    if (order.date_order) {
+                        order.date_order = moment.utc(order.date_order)
+                            .local().format('YYYY-MM-DD HH:mm:ss');
+                    }
+                });
+            }).fail(function (error, event) {
+                if (parseInt(error.code, 10) === 200) {
+                    // Business Logic Error, not a connection problem
+                    self.gui.show_popup(
+                        'error-traceback', {
+                            'title': error.data.message,
+                            'body': error.data.debug,
+                        }
+                    );
+                } else {
+                    self.gui.show_popup('error', {
+                        'title': _t('Connection error'),
+                        'body': _t(
+                            'Can not execute this action because the POS' +
+                            ' is currently offline'),
+                    });
+                }
+                event.preventDefault();
             });
         },
+
+        perform_search: function () {
+            var self = this;
+            return this.search_done_orders(self.search_query)
+                .done(function () {
+                    self.render_list();
+                });
+        },
+        click_cancel: function(){
+	    	this.gui.close_popup();
+	    },
+//        clear_search: function () {
+//            var self = this;
+//            self.$('.searchbox input')[0].value = '';
+//            self.$('.searchbox input').focus();
+//            self.search_query = false;
+//            self.perform_search();
+//        },
+
     });
 
     screens.ReceiptScreenWidget.include({
         show: function(){
             this._super();
             var self = this;
-
             var barcode_val = this.pos.get_order().get_name();
             if (barcode_val.indexOf(_t("Order ")) != -1) {
                 var vals = barcode_val.split(_t("Order "));
@@ -288,15 +491,29 @@ odoo.define('pos_return.pos_return', function (require) {
                 }
             }
         },
+        render_receipt: function () {
+            if (!this.pos.get_order().get_ret_o_ref()) {
+                return this._super();
+            }
+            else{
+                var order = this.pos.get_order();
+                this.$('.pos-receipt-container').html(QWeb.render('PosTicket', {
+                    widget: this,
+                    pos: this.pos,
+                    order: order,
+                    returned_order_reference : order.get_ret_o_ref(),
+                    returned_order_id : order.get_ret_o_id(),
+                    receipt: order.export_for_printing(),
+                    orderlines: order.get_orderlines(),
+                    paymentlines: order.get_paymentlines(),
+                }));
+                this.pos.from_loaded_order = true;
+            }
+        },
         click_next: function() {
             this._super();
             this.pos.get('selectedOrder').set_ret_o_id('');
             this.pos.get('selectedOrder').destroy();
-            this.pos.get('selectedOrder').set_sale_mode(false);
-            this.pos.get('selectedOrder').set_missing_mode(false);
-            $("span#sale_mode").css('background', 'blue');
-            $("span#return_order").css('background', '');
-            $("span#missing_return_order").css('background', '');
             $('#return_order_ref').html('');
             $('#return_order_number').val('');
             $("span.remaining-qty-tag").css('display', 'none');
@@ -328,7 +545,6 @@ odoo.define('pos_return.pos_return', function (require) {
     });
 
     var orderline_id = 1;
-
     var _super_orderline = models.Orderline.prototype;
     models.Orderline = models.Orderline.extend({
         initialize: function(attr,options){
@@ -352,15 +568,18 @@ odoo.define('pos_return.pos_return', function (require) {
             var return_process = oid;
             var return_qty = this.get_quantity();
             var order_ref = this.pos.get_order() ? this.pos.get_order().get_ret_o_id() : false;
+
             var new_val = {
                 return_process: return_process,
                 return_qty: parseInt(return_qty),
                 back_order: this.get_back_order(),
                 scrap_item: this.get_scrap_item() || false,
             }
+
             $.extend(lines, new_val);
             return lines;
         },
+
         set_oid: function(oid) {
             this.set('oid', oid)
         },
@@ -372,25 +591,6 @@ odoo.define('pos_return.pos_return', function (require) {
         },
         get_back_order: function() {
             return this.get('backorder');
-        },
-        can_be_merged_with: function(orderline){
-            var merged_lines = _super_orderline.can_be_merged_with.call(this, orderline);
-            if(this.get_oid() && this.pos.get('selectedOrder').get_sale_mode()) {
-                return false;
-            } else if ((this.get_oid() != orderline.get_oid()) &&
-                            (this.get_product().id == orderline.get_product().id)) {
-                return false;
-            } else if(this.get_scrap_item()){
-            	return false
-            }
-            return merged_lines;
-        },
-        merge: function(orderline){
-            if (this.get_oid() || this.pos.get('selectedOrder').get_missing_mode()) {
-                this.set_quantity(this.get_quantity() + orderline.get_quantity() * -1);
-            } else {
-                _super_orderline.merge.call(this, orderline);
-            }
         },
         set_scrap_item: function(scrap_item) {
             this.set('scrap_item', scrap_item);
@@ -407,33 +607,20 @@ odoo.define('pos_return.pos_return', function (require) {
             this.set({
                 ret_o_id:       null,
                 ret_o_ref:      null,
-                sale_mode:      false,
-                missing_mode:   false,
             });
-            this.receipt_type = 'receipt';  // 'receipt' || 'invoice'
-            this.temporary = options.temporary || false;
-            $("span#sale_mode").trigger('click');
-            return this;
-        },
-        generate_unique_id: function() {
-        	var timestamp = new Date().getTime();
-            return timestamp.toString().slice(-10);
-        },
 
-        // return order
+//            this.receipt_type = 'receipt';  // 'receipt' || 'invoice'
+//            this.temporary = options.temporary || false;
+//            $("span#sale_mode").trigger('click');
+//            return this;
+        },
+//        generate_unique_id: function() {
+//        	var timestamp = new Date().getTime();
+//            return timestamp.toString().slice(-10);
+//        },
+//
+//        // return order
 
-        set_sale_mode: function(sale_mode) {
-            this.set('sale_mode', sale_mode);
-        },
-        get_sale_mode: function() {
-            return this.get('sale_mode');
-        },
-        set_missing_mode: function(missing_mode) {
-            this.set('missing_mode', missing_mode);
-        },
-        get_missing_mode: function() {
-            return this.get('missing_mode');
-        },
         set_ret_o_id: function(ret_o_id) {
             this.set('ret_o_id', ret_o_id)
         },
@@ -446,51 +633,25 @@ odoo.define('pos_return.pos_return', function (require) {
         get_ret_o_ref: function(){
             return this.get('ret_o_ref');
         },
-        add_product: function(product, options){
-        	var self = this;
-            options = options || {};
-            var attr = JSON.parse(JSON.stringify(product));
-            attr.pos = this.pos;
-            attr.order = this;
-            var selectedOrder = this.pos.get_order();
-            var is_sale_mode = this.get_sale_mode();
-            var is_missing_mode = this.get_missing_mode();
-            var retoid = this.pos.get_order().get_ret_o_id();
-            var order_ref = this.pos.get_order().get_ret_o_ref() // to add backorder in line.
-            if(is_missing_mode) {
-                var line = new models.Orderline({}, {pos: attr.pos, order: self, product: product});
-                if (retoid) {
-                    line.set_oid(retoid);
-                    line.set_back_order(order_ref);
-                }
-                if(options.quantity !== undefined){
-                    line.set_quantity(options.quantity);
-                }
-                if(options.price !== undefined){
-                    line.set_unit_price(options.price);
-                }
-                if(options.discount !== undefined){
-                    line.set_discount(options.discount);
-                }
-                var last_orderline = this.get_last_orderline();
-                if( last_orderline && last_orderline.can_be_merged_with(line) && options.merge !== false){
-                    last_orderline.merge(line);
-                }else{
-                    line.set_quantity(line.get_quantity() * -1)
-                    this.add_orderline(line);
-                }
-                this.select_orderline(this.get_last_orderline());
-            } else {
-                _super_order.add_product.call(this, product, options);
-            }
-        },
+
         export_for_printing: function(){
             var submitted_order_printing = _super_order.export_for_printing.call(this);
             var order_no = this.get_name() || false ;
             var order_no = order_no ? this.get_name().replace(_t('Order '),'') : false;
+            var ret_o_id = this.get_ret_o_id();
+            var ret_o_ref = this.get_ret_o_ref();
+            var returned_order_reference = '';
+            var returned_order_id = '';
+            if(ret_o_id)
+            {
+                returned_order_reference = this.get_ret_o_ref();
+                returned_order_id = this.get_ret_o_id();
+            }
             var new_val = {
             		'ret_o_id': this.get_ret_o_id(),
             		'order_no': order_no,
+            		returned_order_reference:returned_order_reference,
+                    returned_order_id:returned_order_id,
             };
             $.extend(submitted_order_printing, new_val);
             return submitted_order_printing;
@@ -498,11 +659,17 @@ odoo.define('pos_return.pos_return', function (require) {
         export_as_JSON: function() {
             var submitted_order = _super_order.export_as_JSON.call(this);
             var parent_return_order = '';
+            var returned_order_reference = '';
+            var returned_order_id = '';
             var ret_o_id = this.get_ret_o_id();
             var ret_o_ref = this.get_ret_o_ref();
             var return_seq = 0;
             if (ret_o_id) {
                 parent_return_order = this.get_ret_o_id();
+                returned_order_reference = this.get_ret_o_ref();
+                returned_order_id = this.get_ret_o_id();
+                this.pos.reloaded_order = submitted_order
+
             }
             var backOrders = '';
             _.each(this.get_orderlines(),function(item) {
@@ -514,11 +681,13 @@ odoo.define('pos_return.pos_return', function (require) {
                 parent_return_order: parent_return_order, // Required to create paid return order
                 return_seq: return_seq || 0,
                 back_order: backOrders,
-                sale_mode: this.get_sale_mode(),
+                returned_order_reference:returned_order_reference,
+                returned_order_id:returned_order_id,
             }
             $.extend(submitted_order, new_val);
             return submitted_order;
         },
+
     });
 
     var ReturnPaymentScreenWidget = screens.PaymentScreenWidget.prototype;
@@ -530,13 +699,7 @@ odoo.define('pos_return.pos_return', function (require) {
             this._super(options);
 
             currentOrder.set_ret_o_id('');
-            currentOrder.set_sale_mode(true);
-            currentOrder.set_missing_mode(false);
-            $("span#sale_mode").css('background', 'blue');
-            $("span#return_order").css('background', '');
-            $("span#missing_return_order").css('background', '');
-            $('#return_order_ref').html('');
-            $('#return_order_number').val('');
+
             $("span.remaining-qty-tag").css('display', 'none');
         },
         wait: function( callback, seconds){
@@ -606,4 +769,14 @@ odoo.define('pos_return.pos_return', function (require) {
             }
         },
     });
+    var Newwidgets = chrome.Chrome.prototype.widgets;
+    Newwidgets.push({
+        'name':   'list_return',
+        'widget': ListOrderreturnWidget,
+        'prepend': '.pos-rightheader',
+
+    });
+    return {
+        ListOrderreturnWidget: ListOrderreturnWidget,
+    };
 });
