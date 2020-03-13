@@ -151,6 +151,7 @@ odoo.define('pos_order_mgmt.widgets', function (require) {
         order_list_actions: function (event, action) {
             var self = this;
             var dataset = event.target.parentNode.dataset;
+            console.log("++++++++++dataset",event.target.parentNode)
             self.load_order_data(parseInt(dataset.orderId, 10))
                 .then(function (order_data) {
                     self.order_action(order_data, action);

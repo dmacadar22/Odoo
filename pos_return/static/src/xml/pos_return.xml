@@ -46,7 +46,6 @@
                     <span class='searchbox'></span>
                     </p>
                 <div class="ac_product_list">
-
 				<t t-if="widget.options and widget.options.lines">
 `                    <div class="order_list_length" style="width:100%;display:inline-block;">
                     <div style="width:90%;display:block;margin:0px auto;">
@@ -63,7 +62,7 @@
                             <p style="font-size: 16px;line-height: 40px;">Amount</p>
                         </div>
                         <t t-foreach='widget.options.lines' t-as='line'>
-						<div class="order_reference" style="cursor:pointer;">
+                            <div class="order_reference" style="cursor:pointer;">
 							<div style="display:inline-block;width:100%;">
 								<div style="width:25%;float:left;">
 									<t t-if="line.pos_reference">
@@ -109,13 +108,13 @@
             <div class="popup popup-textinput pos-return-popup">
                 <p class="title">Return Order</p>
                 <div align="left" class="content">
-                	<input type="text" id="return_order_number" placeholder="Scan barcode of Order"/>
+                	<input type="hidden" id="return_order_number" placeholder="Scan barcode of Order"/>
                 </div>
                 <br/>
                 <div class="ac_product_list">
                     <t t-if='widget.lines'>
                         <t t-foreach='widget.lines' t-as='line'>
-                        	<t t-set="product" t-value="widget.pos.db.get_product_by_id(line.product_id[0])"/>
+                            <t t-set="product" t-value="widget.pos.db.get_product_by_id(line.product_id[0])"/>
                             <span class='product product_content' t-att-data-product-id="product.id"
                                   t-att-data-line-id="line.id">
 	                            <div class="product-img">
@@ -192,7 +191,9 @@
                     <div class="button cancel">
                         Cancel
                     </div>
-
+                    <!--<div class="button back_new">
+                        Back
+                    </div>-->
                 </div>
             </div>
         </div>

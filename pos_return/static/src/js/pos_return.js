@@ -336,6 +336,46 @@ odoo.define('pos_return.pos_return', function (require) {
 	    	}
 
 	    },
+	    //Temporary Commented
+/*	    events:{
+	        'click .back_new':'click_back_new'
+	    },
+	    click_back_new:function(){
+            var self=this;
+            var lines = self.gui.chrome.popups.pos_return_order_list.options.lines
+	        self.gui.show_popup('pos_return_order_list',{lines:lines})
+
+	        var order_pos_ref = $(".order_reference")
+                if($(order_pos_ref).length)
+                    {
+                        $(".order_reference").click(function(){
+                        var close_button = $(".close_button")
+                            if($(close_button).length)
+                            {
+                                $(".keyboard_frame").css("display","none")
+                            }
+                            var order_ref = $(this).find(".order_pos_ref").text();
+                            if(order_ref.length)
+                            {
+                                self.gui.show_popup('pos_return_order');
+                                var order_ref_val = $("#return_order_number").val(order_ref)
+                                if($(order_ref_val).length)
+                                {
+                                    var e = $.Event( "keypress", { which: 13 } );
+                                    $('#return_order_number').trigger(e);
+
+                                }
+//                                self.click_confirm();
+                            }
+                        })
+                    }
+            self.$('.return_scrap .input-group-addon').delegate('a.js_scrap_qty','click', this.update_scrap_product_qty);
+            self.$('.return_product .input-group-addon').delegate('a.js_return_qty','click', this.update_return_product_qty);
+            self.$('div.content').delegate('#return_order_number','keypress', this.keypress_order_number);
+            self.$('div.input-group').delegate('.js_quantity','input', this.keydown_qty);
+            self.$('.ac_product_list').delegate('.product-img','click', this.select_item);
+            self.click_confirm();*/
+//	    },
 	    click_cancel: function(){
 	    	this.gui.close_popup();
 	    },
@@ -368,7 +408,6 @@ odoo.define('pos_return.pos_return', function (require) {
             $("span#return_order").click(function() {
                 selectedOrder = self.pos.get_order();
                 self.search_query = false;
-                self.perform_search();
                 self.render_list();
             })
 
@@ -377,13 +416,10 @@ odoo.define('pos_return.pos_return', function (require) {
         render_list: function () {
             var self = this;
             var selectedOrder = self.pos.get_order();
-            var order_pos_config = selectedOrder['pos']['pos_session']['config_id'][0]
-            var order_pos_user = selectedOrder['pos']['pos_session']['user_id'][0]
             rpc.query({
                       model: 'pos.order',
                       method: 'search_done_orders_for_pos',
                       args: ['', this.pos.pos_session.id],
-                      domain: [['user_id', '=', order_pos_user],['config_id', '=', order_pos_config],['returned_order_id', '=', false]],
             }).then(function(params) {
                if(params && params.length > 0){
                     var lines = [];
@@ -518,6 +554,7 @@ odoo.define('pos_return.pos_return', function (require) {
             $('#return_order_number').val('');
             $("span.remaining-qty-tag").css('display', 'none');
         },
+
         wait: function( callback, seconds){
             return window.setTimeout( callback, seconds * 1000 );
 	    },
@@ -768,6 +805,18 @@ odoo.define('pos_return.pos_return', function (require) {
                 }
             }
         },
+        remove_orderline: function(order_line){
+            this._super(order_line);
+            if(this.pos.get_order().get_orderlines().length === 0){
+                this.pos.get('selectedOrder').set_ret_o_id('');
+                this.pos.get('selectedOrder').destroy();
+                $('#return_order_ref').html('');
+                $('#return_order_number').val('');
+                $("span.remaining-qty-tag").css('display', 'none');
+                this.renderElement();
+            }
+        },
+
     });
     var Newwidgets = chrome.Chrome.prototype.widgets;
     Newwidgets.push({
