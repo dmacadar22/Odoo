@@ -47,26 +47,28 @@
                     </p>
                 <div class="ac_product_list">
 				<t t-if="widget.options and widget.options.lines">
-`                    <div class="order_list_length" style="width:100%;display:inline-block;">
-                    <div style="width:90%;display:block;margin:0px auto;">
+                    <div class="order_list_length" style="width:100%;display:inline-block;">
+                    <div style="width:90%;display:block;margin:0px auto;border:1px solid #ccc">
+                        <div style="padding: 1px 3px 1px 5px;display:inline-block;width:100%;border-bottom:2px solid #ccc;">
                         <div style="width:25%;float:left;">
-                            <p style="font-size: 16px;line-height: 40px;">Ref.</p>
+                            <p style="margin: 0px;font-size: 16px;line-height: 40px;">Ref.</p>
                         </div>
                         <div style="width:25%;float:left;">
-                            <p style="font-size: 16px;line-height: 40px;">Customer</p>
+                            <p style="margin: 0px;font-size: 16px;line-height: 40px;">Customer</p>
                         </div>
                         <div style="width:25%;float:left;">
-                            <p style="font-size: 16px;line-height: 40px;">Date</p>
+                            <p style="margin: 0px;font-size: 16px;line-height: 40px;">Date</p>
                         </div>
                         <div style="width:25%;float:left;">
-                            <p style="font-size: 16px;line-height: 40px;">Amount</p>
+                            <p style="margin: 0px;font-size: 16px;line-height: 40px;">Amount</p>
+                        </div>
                         </div>
                         <t t-foreach='widget.options.lines' t-as='line'>
                             <div class="order_reference" style="cursor:pointer;">
-							<div style="display:inline-block;width:100%;">
+							<div style="padding: 1px 3px 1px 5px;display:inline-block;width:100%;">
 								<div style="width:25%;float:left;">
 									<t t-if="line.pos_reference">
-										<p class="order_pos_reference" style="font-size: 16px;line-height: 40px;"><span class="order_pos_ref" t-esc="line.pos_reference"></span>
+										<p class="order_pos_reference" style="margin:0px;font-size: 16px;line-height: 40px;"><span class="order_pos_ref" t-esc="line.pos_reference"></span>
                                         </p>
 									</t>
 								</div>
@@ -80,12 +82,12 @@
 								</div>
                                 <div style="width:25%;float:left;">
 									<t t-if="line.date_order">
-                                        <p style="font-size: 16px;line-height: 40px;" t-esc="line.date_order"></p>
+                                        <p style="margin:0px;font-size: 16px;line-height: 40px;" t-esc="line.date_order"></p>
 									</t>
 								</div>
                                 <div style="width:25%;float:left;">
 									<t t-if="line.amount_total">
-                                        <p style="font-size: 16px;line-height: 40px;" t-esc="widget.format_currency(line.amount_total)"></p>
+                                        <p style="margin:0px;font-size: 16px;line-height: 40px;" t-esc="widget.format_currency(line.amount_total)"></p>
 									</t>
 								</div>
 							</div>
@@ -191,7 +193,7 @@
                     <div class="button cancel">
                         Cancel
                     </div>
-                    <!--<div class="button back_new">
+                   <!-- <div class="button back_new">
                         Back
                     </div>-->
                 </div>

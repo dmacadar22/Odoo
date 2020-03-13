@@ -43,3 +43,14 @@
 .orderlist-screen table td:not([name='td_ol_customer']) {
     white-space: nowrap;
 }
+/*-------------Custom Style-------------------*/
+.order_list_length p
+{
+    text-align:left;
+}
+div.order_reference:nth-child(odd) {background: #e2e1e1}
+.order_reference
+{
+    display: inline-block;
+    width: 100%;
+}
