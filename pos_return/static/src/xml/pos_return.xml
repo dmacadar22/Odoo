@@ -193,9 +193,9 @@
                     <div class="button cancel">
                         Cancel
                     </div>
-                   <!-- <div class="button back_new">
+                    <div class="button prev_popup">
                         Back
-                    </div>-->
+                    </div>
                 </div>
             </div>
         </div>

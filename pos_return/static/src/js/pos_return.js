@@ -43,6 +43,11 @@ odoo.define('pos_return.pos_return', function (require) {
         },
         click_cancel_close: function(){
 	    	this.gui.close_popup();
+            this.pos.get('selectedOrder').set_ret_o_id('');
+            this.pos.get('selectedOrder').destroy();
+            $('#return_order_ref').html('');
+            $('#return_order_number').val('');
+            $("span.remaining-qty-tag").css('display', 'none');
 	    },
 
 //        Open the Keyborad on focus
@@ -89,7 +94,6 @@ odoo.define('pos_return.pos_return', function (require) {
                     else
                     {
                         $('.ac_product_list').append("<div style='width:100%;display:inline-block;'><div style='width:90%;display:block;margin:0px auto;'><div class='order_reference' style='cursor:pointer;'><div style='width:25%;float:left;'><p class='order_pos_reference' style='margin:0px;font-size: 16px;line-height: 40px;'><span class='order_pos_ref'>"+ $(order)[0]['pos_reference'] +"</span></p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'><span></span></p></div><div style='width:25%;float:left;'><p style='margin:0px;font-size: 16px;line-height: 40px;'>"+$(order)[0]['date_order']+"</p></div><div style='width:25%;float:left;'><p style='margin:0px;font-size: 16px;line-height: 40px;'>"+self.format_currency($(order)[0]['amount_total'])+"</p></div></div></div></div>")
-
                     }
                 });
                 var order_pos_ref = $(".order_reference")
@@ -141,10 +145,17 @@ odoo.define('pos_return.pos_return', function (require) {
             return this.search_done_orders(self.search_query)
                 .done(function () {
                 });
+
         },
         click_cancel: function(){
 	    	this.gui.close_popup();
+            this.pos.get('selectedOrder').set_ret_o_id('');
+            this.pos.get('selectedOrder').destroy();
+            $('#return_order_ref').html('');
+            $('#return_order_number').val('');
+            $("span.remaining-qty-tag").css('display', 'none');
 	    },
+
     })
 //    Load the Products for return and Scrap Qty based on Order
     var PosReturnOrder = PopupWidget.extend({
@@ -227,12 +238,13 @@ odoo.define('pos_return.pos_return', function (require) {
 	                                    self.lines = lines;
 	                                    self.renderElement();
                                 	} else {
-                                		alert(_t("No item found"));
-                                		self.gui.current_popup.close();
+                                		alert(_t("This order has already been fully returned."));
+                                		self.gui.close_popup();
+                                        $("span#return_order").trigger('click')
                                 	}
                                 });
                         	} else {
-                        		alert(_t("No result found"));
+                        		alert(_t("This order has already been fully returned."));
                         	}
                         }).fail(function(error, event) {
                             if (error.code === -32098) {
@@ -262,6 +274,9 @@ odoo.define('pos_return.pos_return', function (require) {
 	        	}
 	        };
 	    },
+	    events: _.extend({}, PopupWidget.prototype.events, {
+            'click .prev_popup':'click_prev_popup'
+        }),
 	    selected_item: function($elem){
 	    	var self = this;
 	    	if($elem.hasClass('select_item')){
@@ -279,40 +294,6 @@ odoo.define('pos_return.pos_return', function (require) {
 	        $("input#return_order_number").focus();
 	        $('.ac_product_list').empty();
 	    },
-	    //Temporary Commented
-	    /*events:{
-	        'click .back_new':'click_back_new'
-	    },
-	    click_back_new:function(){
-            var self=this;
-            var lines = this.gui.chrome.popups.pos_return_order_list.options.lines
-	        this.gui.show_popup('pos_return_order_list',{lines:lines})
-	        var order_pos_ref = $(".order_reference")
-                if($(order_pos_ref).length)
-                    {
-                        $(".order_reference").click(function(){
-                        var close_button = $(".close_button")
-                            if($(close_button).length)
-                            {
-                                $(".keyboard_frame").css("display","none")
-                            }
-                            var order_ref = $(this).find(".order_pos_ref").text();
-                            if(order_ref.length)
-                            {
-                                self.gui.show_popup('pos_return_order');
-                                var order_ref_val = $("#return_order_number").val(order_ref)
-                                if($(order_ref_val).length)
-                                {
-                                    var e = $.Event( "keypress", { which: 13 } );
-                                    $('#return_order_number').trigger(e);
-
-                                }
-//                                self.click_confirm();
-                            }
-                        })
-                    }
-
-	    },*/
 	    click_confirm: function(){
 	    	var self = this;
 	    	var selectedOrder = this.pos.get_order();
@@ -372,9 +353,13 @@ odoo.define('pos_return.pos_return', function (require) {
 	    	}
 
 	    },
-
 	    click_cancel: function(){
 	    	this.gui.close_popup();
+            this.pos.get('selectedOrder').set_ret_o_id('');
+            this.pos.get('selectedOrder').destroy();
+            $('#return_order_ref').html('');
+            $('#return_order_number').val('');
+            $("span.remaining-qty-tag").css('display', 'none');
 	    },
 	    get_product_image_url: function(product_id){
     		return window.location.origin + '/web/binary/image?model=product.product&field=image_medium&id='+product_id;
@@ -387,6 +372,11 @@ odoo.define('pos_return.pos_return', function (require) {
             this.$('div.input-group').delegate('.js_quantity','input', this.keydown_qty);
             this.$('.ac_product_list').delegate('.product-img','click', this.select_item);
     	},
+
+	    click_prev_popup:function(){
+            this.gui.close_popup();
+            $("span#return_order").trigger('click')
+	    },
 
 	});
 	gui.define_popup({name:'pos_return_order', widget: PosReturnOrder});
@@ -499,6 +489,12 @@ odoo.define('pos_return.pos_return', function (require) {
         },
         click_cancel: function(){
 	    	this.gui.close_popup();
+            this.pos.get('selectedOrder').set_ret_o_id('');
+            this.pos.get('selectedOrder').destroy();
+            $('#return_order_ref').html('');
+            $('#return_order_number').val('');
+            $("span.remaining-qty-tag").css('display', 'none');
+
 	    },
 //        clear_search: function () {
 //            var self = this;
@@ -824,5 +820,7 @@ odoo.define('pos_return.pos_return', function (require) {
     });
     return {
         ListOrderreturnWidget: ListOrderreturnWidget,
+        PosReturnOrder:PosReturnOrder,
     };
+
 });
