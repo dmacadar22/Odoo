@@ -726,7 +726,7 @@ odoo.define('pos_return.pos_return', function (require) {
                 var vals = barcode_val.split(_t("Order "));
                 if (vals) {
                     var barcode = vals[1];
-                    $("tr#barcode1").html($("<td style='padding:2px 2px 2px 0px; text-align:center;'><div class='" + barcode + "barcode_img'/></td>"));
+                    $("tr#barcode1").html($("<td style='padding:2px 2px 2px 0px; text-align:center;'><div class='" + barcode + " barcode_img'/></td>"));
                     $("." + barcode.toString()).barcode(barcode.toString(), "code128");
                 }
             }
