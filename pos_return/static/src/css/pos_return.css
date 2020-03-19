@@ -7,12 +7,12 @@
 }
 
 .pos #barcode1 .barcode_img{
-    width:330px;
+    width:330px !important;
     height:50px;
 }
 .pos #barcode1 object{
     width: 100% !important;
-    margin: 0 !important;
+    margin: -30px !important;
 }
 
 .label {
