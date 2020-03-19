@@ -82,7 +82,7 @@ class PosOrder(models.Model):
     def _prepare_fields_for_pos_list(self):
         return [
             'name', 'pos_reference', 'partner_id', 'date_order',
-            'amount_total',
+            'amount_total', 'order_status'
         ]
 
     @api.model
@@ -90,7 +90,6 @@ class PosOrder(models.Model):
         session_obj = self.env['pos.session']
         config = session_obj.browse(pos_session_id).config_id
         condition = self._prepare_filter_for_pos(pos_session_id)
-
         if not query:
             # Search only this POS orders
             condition += [('config_id', '=', config.id),('returned_order_id','=',False)]
@@ -100,9 +99,8 @@ class PosOrder(models.Model):
                 pos_session_id, query)
             condition += [('config_id', '=', config.id),('returned_order_id','=',False)]
         field_names = self._prepare_fields_for_pos_list()
-        bb = self.search_read(
+        return self.search_read(
             condition, field_names, limit=config.iface_load_done_order_max_qty)
-        return bb
 
     @api.multi
     def _prepare_done_order_for_pos(self):

@@ -21,77 +21,113 @@
         </t>
     </t>
 
-    <t t-extend="PosTicket">
-        <t t-jquery="t[t-esc='order.name']" t-operation="after">
-            <t t-if="order.returned_order_id">
-                <br/>
-                    <span name="returned-order-reference">Rectifies: </span><t t-esc="order.returned_order_reference"/>
-            </t>
-        </t>
-    	<t t-jquery="table:last" t-operation="after">
-
-            <br/>
-            <table style="margin-left: 48px;"><tbody><tr id="barcode1"></tr></tbody></table>
-		</t>
-	</t>
+    <!-- <t t-extend="PosTicket">
+            <t t-jquery="table:last" t-operation="after">
+             <br/>
+             <table style="margin-left: 48px;"><tbody><tr id="barcode1"></tr></tbody></table>
+         </t>
+     </t>-->
     <t t-name="PosReturnOrderList">
 		 <div class="modal-dialog">
             <div class="popup popup-textinput pos-return-popup">
                 <p class="title">Order Lists</p>
-                    <p style="width:100%;display:inline-block;margin:0;">
+                <p style="width:100%;display:inline-block;margin:0;">
                         <span class='searchbox' style="position:relative;">
-                        <input id="search_string" placeholder='Search Order' />
-                        <span class='search-clear'></span>
+                        <input id="search_string" placeholder='Search Order'/>
+                            <span class='search-clear'></span>
                     </span>
                     <span class='searchbox'></span>
-                    </p>
+                </p>
                 <div class="ac_product_list">
 				<t t-if="widget.options and widget.options.lines">
                     <div class="order_list_length" style="width:100%;display:inline-block;">
-                    <div style="width:90%;display:block;margin:0px auto;border:1px solid #ccc">
-                        <div style="padding: 1px 3px 1px 5px;display:inline-block;width:100%;border-bottom:2px solid #ccc;">
-                        <div style="width:25%;float:left;">
+                    <div style="width:99%;display:block;margin:0px auto;">
+                        <div style="display:inline-block;width:100%;border-bottom:2px solid #ccc;">
+                            <div style="display:block;width:90%;margin:0px auto;">
+                        <div style="width:15%;float:left;">
                             <p style="margin: 0px;font-size: 16px;line-height: 40px;">Ref.</p>
                         </div>
-                        <div style="width:25%;float:left;">
+                                <div style="width:15%;float:left;">
                             <p style="margin: 0px;font-size: 16px;line-height: 40px;">Customer</p>
                         </div>
-                        <div style="width:25%;float:left;">
+                                <div style="width:15%;float:left;">
                             <p style="margin: 0px;font-size: 16px;line-height: 40px;">Date</p>
                         </div>
-                        <div style="width:25%;float:left;">
+                                <div style="width:15%;float:left;">
                             <p style="margin: 0px;font-size: 16px;line-height: 40px;">Amount</p>
+                        </div>
+                                <div style="width:15%;float:left;">
+                            <p style="margin: 0px;font-size: 16px;line-height: 40px;">Status</p>
+                        </div>
+                                <div style="width:25%;float:left;">
+                        </div>
                         </div>
                         </div>
                         <t t-foreach='widget.options.lines' t-as='line'>
+                            <div class="order_main_div">
                             <div class="order_reference" style="cursor:pointer;">
-							<div style="padding: 1px 3px 1px 5px;display:inline-block;width:100%;">
-								<div style="width:25%;float:left;">
+
+							<div style="display:block;width:90%;margin:0px auto;">
+								<div style="width:15%;float:left;">
 									<t t-if="line.pos_reference">
-										<p class="order_pos_reference" style="margin:0px;font-size: 16px;line-height: 40px;"><span class="order_pos_ref" t-esc="line.pos_reference"></span>
+										<p class="order_pos_reference"
+                                           style="margin:0px;font-size: 16px;line-height: 25px;"><span class="order_pos_ref" t-esc="line.pos_reference"></span>
                                         </p>
 									</t>
 								</div>
-                                <div style="width:25%;float:left;">
+                                <div style="width:15%;float:left;">
 									<t t-if="line.partner_id">
-                                        <p style="font-size: 16px;line-height: 40px;" t-esc="line.partner_id"></p>
+                                        <p style="font-size: 16px;line-height: 25px;" t-esc="line.partner_id"></p>
 									</t>
                                     <t t-else="">
-                                        <p style="font-size: 16px;line-height: 40px;"></p>
+                                        <p style="font-size: 16px;line-height: 24px;"></p>
                                     </t>
 								</div>
-                                <div style="width:25%;float:left;">
+                                <div style="width:15%;float:left;">
 									<t t-if="line.date_order">
-                                        <p style="margin:0px;font-size: 16px;line-height: 40px;" t-esc="line.date_order"></p>
+                                        <p style="margin:0px;font-size: 16px;line-height: 25px;"
+                                           t-esc="line.date_order"></p>
 									</t>
 								</div>
-                                <div style="width:25%;float:left;">
+                                <div style="width:15%;float:left;">
 									<t t-if="line.amount_total">
-                                        <p style="margin:0px;font-size: 16px;line-height: 40px;" t-esc="widget.format_currency(line.amount_total)"></p>
+                                        <p style="margin:0px;font-size: 16px;line-height: 25px;"
+                                           t-esc="widget.format_currency(line.amount_total)"></p>
 									</t>
 								</div>
+                                <div style="width:15%;float:left;">
+									<t t-if="line.order_status">
+                                        <t t-if="line.order_status == 'freturn'">
+                                            <p style="margin:0px;font-size: 16px;line-height: 25px;">Fully Returned</p>
+                                        </t>
+                                        <t t-if="line.order_status == 'preturn'">
+                                            <p style="margin:0px;font-size: 16px;line-height: 25px;">Partially Returned</p>
+                                        </t>
+									</t>
+
+                                    <p style="font-size: 16px;line-height: 25px;"></p>
+                                </div>
+
 							</div>
 						</div>
+                            <div style="width:25%;float:left;" class="order_class">
+                                    <input type="hidden" id="order_id" t-att-value="line.id"></input>
+                                    <p name="td_ol_reprint" t-att-data-order-id="line.id" style="margin-top:0;margin-bottom: 9px;display: inline-block;">
+                                        <span t-if="widget.pos.config.iface_reprint_done_order"
+                                              class="button order-list-reprint" t-att-data-order-id="line.id"
+                                              title="Print a duplicate for this order">
+                                            <i class='fa fa-fw fa-print'/>
+                                        </span>
+                                        <span t-if="widget.pos.config.iface_copy_done_order"
+                                              class="button order-list-copy" t-att-data-order-id="line.id"
+                                              t-att-data-Uid='line.uid' title="Create a new order based on this one">
+                                            <i class='fa fa-fw fa-copy'/>
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+
+
 					</t>
                     </div>
                     </div>

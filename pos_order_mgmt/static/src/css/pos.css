@@ -49,8 +49,9 @@
     text-align:left;
 }
 div.order_reference:nth-child(odd) {background: #e2e1e1}
-.order_reference
+.order_main_div
 {
     display: inline-block;
     width: 100%;
+    border-bottom:1px solid #ccc;
 }

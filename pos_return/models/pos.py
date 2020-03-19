@@ -23,6 +23,17 @@ class pos_order(models.Model):
     return_seq = fields.Integer('Return Sequence')
     return_process = fields.Boolean('Return Process')
     back_order = fields.Char('Back Order', size=256, default=False, copy=False)
+    order_status = fields.Selection([('freturn', 'Fully Returned'), ('preturn', 'Partially Returned')], compute="pos_check_order_status", string="Order Status")
+
+    @api.depends('lines.return_qty')
+    def pos_check_order_status(self):
+        for pos in self:
+            if any(line.order_status == 'preturn' for line in pos.lines):
+                pos.order_status = 'preturn'
+            elif all(line.order_status == 'freturn' for line in pos.lines):
+                pos.order_status = 'freturn'
+            elif any(line.order_status == 'freturn' for line in pos.lines):
+                pos.order_status = 'preturn'
 
     @api.multi
     def _order_fields(self, ui_order):
@@ -280,11 +291,20 @@ class pos_order(models.Model):
 class pos_order_line(models.Model):
     _inherit = "pos.order.line"
 
-    return_qty = fields.Integer('Return QTY', size=64)
+    return_qty = fields.Float('Return QTY', size=64)
     return_process = fields.Char('Return Process')
     back_order = fields.Char('Back Order', size=256, default=False, copy=False)
     scrap_item = fields.Boolean("Scrap Item")
+    order_status = fields.Selection([('freturn','Fully Returned'),('preturn','Partially Returned')],string="Order Status",compute="_check_order_status", store=True)
 
+    @api.depends('return_qty')
+    def _check_order_status(self):
+        for line in self:
+            if line.return_qty == 0.0:
+                line.order_status = 'freturn'
+            elif line.return_qty < line.qty:
+                line.order_status = 'preturn'
+        return True
 
 class pos_config(models.Model):
     _inherit = "pos.config"

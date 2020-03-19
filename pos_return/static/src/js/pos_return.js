@@ -10,7 +10,7 @@ odoo.define('pos_return.pos_return', function (require) {
 	var chrome = require('point_of_sale.chrome');
 	var models = require('point_of_sale.models');
 	var PopupWidget = require('point_of_sale.popups');
-
+    var pos = require('point_of_sale.models');
 	var _t = core._t;
 	var QWeb = core.qweb;
     var round_di = utils.round_decimals;
@@ -29,27 +29,367 @@ odoo.define('pos_return.pos_return', function (require) {
 //    Pop up Screen For listing the Orders
     var PosReturnOrderList = PopupWidget.extend({
         template: 'PosReturnOrderList',
-        init: function(parent, args) {
-	    	var self = this;
-	        this._super(parent, args);
-	        this.options = {};
+        init: function() {
+            this._super.apply(this, arguments);
+            this.options = {};
 	        this.line = [];
-	    },
+        },
+        start:function(){
+            var self = this;
+            this._super();
+            var selectedOrder = self.pos.get_order();
+            $('#return_order_ref').html('');
+//            Click Event for return Products
+            $("span#return_order").click(function() {
+                selectedOrder = self.pos.get_order();
+                self.search_query = false;
+                self.render_list();
+            })
+
+         },
 //       Events for Search(Keyup and focus)
 	    events: {
             'keyup .searchbox input':  'search_orderlist',
             'focus .searchbox input': 'search_orderlistfocus',
             'click .cancel_new' : 'click_cancel_close',
+            'click .close_button' : 'close_click_keyboard'
         },
-        click_cancel_close: function(){
+        close_click_keyboard : function(){
+            $(".keyboard_frame").css("display","none");
+
+        },
+//        Rendered the Search Result of Orders
+        render_list: function () {
+            var self = this;
+//            If there is no search value present
+            if(!$("#search_string").val())
+            {
+                var selectedOrder = self.pos.get_order();
+                var order_id;
+                rpc.query({
+                          model: 'pos.order',
+                          method: 'search_done_orders_for_pos',
+                          args: ['', this.pos.pos_session.id],
+                }).then(function(params) {
+                   if(params && params.length > 0){
+                        var lines = [];
+                        _.each(params,function(r) {
+                            lines.push(r);
+                        });
+                        self.lines = lines;
+                        self.gui.show_popup('pos_return_order_list',{lines:lines})
+                        var order_pos_ref = $(".order_reference")
+                        if($(order_pos_ref).length)
+                        {
+                            $(".order_reference").click(function(){
+                                var close_button = $(".close_button")
+                                if($(close_button).length)
+                                {
+                                    $(".keyboard_frame").css("display","none")
+                                }
+                                var order_ref = $(this).find(".order_pos_ref").text();
+                                if(order_ref.length)
+                                {
+                                    self.gui.show_popup('pos_return_order');
+                                    var order_ref_val = $("#return_order_number").val(order_ref)
+                                    if($(order_ref_val).length)
+                                    {
+                                        var e = $.Event( "keypress", { which: 13 } );
+                                        $('#return_order_number').trigger(e);
+                                    }
+                                }
+                            })
+//                              Click event for Reprint
+                            $('.order-list-reprint').click(function (event) {
+                                $("#search_string").val('')
+                                order_id = $(this).parent().parent(".order_class").find("#order_id").val()
+                                self.order_list_actions(order_id,event, 'print');
+                            });
+//                              Click Event for copy
+                            $('.order-list-copy').click(function (event) {
+                                $("#search_string").val('')
+                                order_id = $(this).parent().parent(".order_class").find("#order_id").val()
+                                self.order_list_actions(order_id,event, 'copy');
+                            });
+                        }
+                   }
+                   else {
+                            self.gui.show_popup('pos_return_order');
+                   }
+                })
+            }
+//            If there is search String (search order)
+            else{
+                var order_pos_ref = $(".order_reference")
+                if($(order_pos_ref).length)
+                {
+                    $(".order_reference").click(function(){
+                        var close_button = $(".close_button")
+                        if($(close_button).length)
+                        {
+                            $(".keyboard_frame").css("display","none")
+                        }
+                        var order_ref = $(this).find(".order_pos_ref").text();
+                        if(order_ref.length)
+                        {
+                            self.gui.show_popup('pos_return_order');
+                            var order_ref_val = $("#return_order_number").val(order_ref)
+                            if($(order_ref_val).length)
+                            {
+                                var e = $.Event( "keypress", { which: 13 } );
+                                $('#return_order_number').trigger(e);
+                            }
+                        }
+                    })
+//                      Click event for Reprint
+                    $('.order-list-reprint').click(function (event) {
+                        $("#search_string").val('')
+                        order_id = $(this).parent().parent(".order_class").find("#order_id").val()
+                        self.order_list_actions(order_id,event, 'print');
+                    });
+//                      Click Event for copy
+                    $('.order-list-copy').click(function (event) {
+                        $("#search_string").val('')
+                        order_id = $(this).parent().parent(".order_class").find("#order_id").val()
+                        self.order_list_actions(order_id,event, 'copy');
+                    });
+                }
+            }
+        },
+//        List of Actions for Printing and Copying the Order Lists
+        order_list_actions: function (order_id,event, action) {
+            var self = this;
+            var dataset = order_id;
+            self.load_order_data(parseInt(dataset, 10))
+                .then(function (order_data) {
+                    self.order_action(order_data, action);
+                });
+        },
+        load_order_data: function (order_id) {
+            var self = this;
+            return this._rpc({
+                model: 'pos.order',
+                method: 'load_done_order_for_pos',
+                args: [order_id],
+            }).fail(function (error) {
+                if (parseInt(error.code, 10) === 200) {
+                    // Business Logic Error, not a connection problem
+                    self.gui.show_popup(
+                        'error-traceback', {
+                            'title': error.data.message,
+                            'body': error.data.debug,
+                        });
+                } else {
+                    self.gui.show_popup('error', {
+                        'title': _t('Connection error'),
+                        'body': _t(
+                            'Can not execute this action because the POS' +
+                            ' is currently offline'),
+                    });
+                }
+            });
+        },
+        order_action: function (order_data, action) {
+            if (this.old_order !== null) {
+                this.gui.back();
+            }
+            var order = this.load_order_from_data(order_data, action);
+            if (!order) {
+                // The load of the order failed. (products not found, ...
+                // We cancel the action
+                return;
+            }
+            this['action_' + action](order_data, order);
+        },
+        action_print: function (order_data, order) {
+            // We store temporarily the current order so we can safely compute
+            // taxes based on fiscal position
+            var self = this
+//            this.pos.current_order = order;
+            var order = order;
+//            this.pos.set_order(order);
+            this.pos.reloaded_order = order;
+            var skip_screen_state = this.pos.config.iface_print_skip_screen;
+            // Disable temporarily skip screen if set
+//            this.pos.config.iface_print_skip_screen = false;
+            this.gui.show_screen('receipt');
+            self.render_receipt(order);
+            this.pos.reloaded_order = false;
+            // Set skip screen to whatever previous state
+            this.pos.config.iface_print_skip_screen = skip_screen_state;
+            // If it's invoiced, we also print the invoice
+            if (order_data.to_invoice) {
+                this.pos.chrome.do_action('point_of_sale.pos_invoice_report', {
+                    additional_context: { active_ids: [order_data.id] }
+                })
+            }
+            // Destroy the order so it's removed from localStorage
+            // Otherwise it will stay there and reappear on browser refresh
+            order.destroy();
+            $(".next").click(function(){
+                order_data.statement_ids = []
+            })
+
+        },
+        render_receipt: function (order) {
+        var order = order;
+        this.$('.pos-receipt-container').html(QWeb.render('PosTicket', {
+            widget: this,
+            pos: this.pos,
+            order: order,
+            returned_order_reference : order.get_ret_o_ref(),
+            returned_order_id : order.get_ret_o_id(),
+            receipt: order.export_for_printing(),
+            orderlines: order.get_orderlines(),
+            paymentlines: order.get_paymentlines(),
+        }));
+        this.pos.from_loaded_order = true;
+        },
+
+        action_copy: function (order_data, order) {
+            order.trigger('change');
+            this.pos.get('orders').add(order);
+            this.pos.set('selectedOrder', order);
+            return order;
+        },
+        load_order_from_data: function (order_data, action) {
+            var self = this;
+            this.unknown_products = [];
+            var order = self._prepare_order_from_order_data(
+                order_data, action);
+            // Forbid POS Order loading if some products are unknown
+            if (self.unknown_products.length > 0) {
+                self.gui.show_popup('error-traceback', {
+                    'title': _t('Unknown Products'),
+                    'body': _t('Unable to load some order lines because the ' +
+                        'products are not available in the POS cache.\n\n' +
+                        'Please check that lines :\n\n  * ') +
+                    self.unknown_products.join("; \n  *"),
+                });
+                return false;
+            }
+            return order;
+        },
+        _prepare_order_from_order_data: function (order_data, action) {
+            var self = this;
+            var order = new pos.Order({}, {
+                pos: this.pos,
+            });
+
+            // Get Customer
+            if (order_data.partner_id) {
+                order.set_client(
+                    this.pos.db.get_partner_by_id(order_data.partner_id));
+            }
+
+            // Get fiscal position
+            if (order_data.fiscal_position && this.pos.fiscal_positions) {
+                var fiscal_positions = this.pos.fiscal_positions;
+                order.fiscal_position = fiscal_positions.filter(function (p) {
+                    return p.id === order_data.fiscal_position;
+                })[0];
+                order.trigger('change');
+            }
+
+            // Get order lines
+            self._prepare_orderlines_from_order_data(
+                order, order_data, action);
+
+            // Get Name
+            if (['print'].indexOf(action) !== -1) {
+                order.name = order_data.pos_reference;
+            }
+
+            // Get to invoice
+            if (['return', 'copy'].indexOf(action) !== -1) {
+                // If previous order was invoiced, we need a refund too
+                order.set_to_invoice(order_data.to_invoice);
+            }
+
+            // Get returned Order
+            if (['print'].indexOf(action) !== -1) {
+                // Get the same value as the original
+                order.returned_order_id = order_data.returned_order_id;
+                order.returned_order_reference =
+                order_data.returned_order_reference;
+            } else if (['return'].indexOf(action) !== -1) {
+                order.returned_order_id = order_data.id;
+                order.returned_order_reference = order_data.pos_reference;
+            }
+
+            // Get Date
+            if (['print'].indexOf(action) !== -1) {
+                order.formatted_validation_date =
+                moment(order_data.date_order).format('YYYY-MM-DD HH:mm:ss');
+            }
+
+            // Get Payment lines
+            if (['print'].indexOf(action) !== -1) {
+                var paymentLines = order_data.statement_ids || [];
+                _.each(paymentLines, function (paymentLine) {
+                    var line = paymentLine;
+                    // In case of local data
+                    if (line.length === 3) {
+                        line = line[2];
+                    }
+                    _.each(self.pos.cashregisters, function (cashregister) {
+                        if (cashregister.journal.id === line.journal_id) {
+                            if (line.amount > 0) {
+                                // If it is not change
+                                order.add_paymentline(cashregister);
+                                order.selected_paymentline.set_amount(
+                                    line.amount);
+                            }
+                        }
+                    });
+                });
+            }
+            return order;
+        },
+        _prepare_orderlines_from_order_data: function (
+            order, order_data, action) {
+            var orderLines = order_data.line_ids || order_data.lines || [];
+
+            var self = this;
+            _.each(orderLines, function (orderLine) {
+                var line = orderLine;
+                // In case of local data
+                if (line.length === 3) {
+                    line = line[2];
+                }
+                var product = self.pos.db.get_product_by_id(line.product_id);
+                // Check if product are available in pos
+                if (_.isUndefined(product)) {
+                    self.unknown_products.push(String(line.product_id));
+                } else {
+                    // Create a new order line
+                    order.add_product(product,
+                        self._prepare_product_options_from_orderline_data(
+                            order, line, action));
+                }
+            });
+        },
+        _prepare_product_options_from_orderline_data: function (
+            order, line, action) {
+            var qty = line.qty;
+            return {
+                price: line.price_unit,
+                quantity: qty,
+                discount: line.discount,
+                merge: false,
+            }
+        },
+
+        click_cancel: function(){
 	    	this.gui.close_popup();
+	    	$("#search_string").val('')
             this.pos.get('selectedOrder').set_ret_o_id('');
             this.pos.get('selectedOrder').destroy();
             $('#return_order_ref').html('');
             $('#return_order_number').val('');
             $("span.remaining-qty-tag").css('display', 'none');
-	    },
 
+	    },
 //        Open the Keyborad on focus
         search_orderlistfocus:function(){
             var self = this
@@ -69,57 +409,35 @@ odoo.define('pos_return.pos_return', function (require) {
               self.perform_search();
             }, 70);
             self.$('.searchbox .search-clear').click(function () {
-              //  self.clear_search();
+//                self.clear_search();
             });
         },
+//        Called from Perform Search to search the orders based on letters pressed
         search_done_orders: function (query) {
             var self = this;
             return this._rpc({
                 model: 'pos.order',
                 method: 'search_done_orders_for_pos',
                 args: [query || '', this.pos.pos_session.id],
-
             }).then(function (result) {
                 self.orders = result;
-                var contents;
                 var orders = []
-                contents = self.$el[0].querySelector('.ac_product_list');
-                contents.innerHTML = ''
-                $('.ac_product_list').append("<div style='width:100%;display:inline-block;'><div style='border:1px solid #ccc;width:90%;display:block;margin:0px auto;'><div style='padding: 1px 3px 1px 5px;display:inline-block;width:100%;'><div class='' style='cursor:pointer;'><div style='width:25%;float:left;'><p class='order_pos_reference' style='margin:0px;font-size: 16px;line-height: 40px;'><span class=order_pos_ref'>Ref.</span></p></div><div style='width:25%;float:left;'><p style='margin:0px;font-size: 16px;line-height: 40px;'><span>Customer</span></p></div><div style='width:25%;float:left;'><p style='margin:0px;font-size: 16px;line-height: 40px;'>Date</p></div><div style='width:25%;float:left;'><p style='margin:0px;font-size: 16px;line-height: 40px;'>Amount</p></div></div></div></div></div>")
+                var order_list = []
+                var search_res;
                 _.each(self.orders, function (order) {
-                    if($(order)[0]['partner_id'])
+                    search_res = $("#search_string").val()
+                    if($(search_res))
                     {
-                        $('.ac_product_list').append("<div style='width:100%;display:inline-block;'><div style='width:90%;display:block;margin:0px auto;'><div class='order_reference' style='cursor:pointer;'><div style='width:25%;float:left;'><p class='order_pos_reference' style='margin:0px;font-size: 16px;line-height: 40px;'><span class='order_pos_ref'>"+ $(order)[0]['pos_reference'] +"</span></p></div><div style='width:25%;float:left;'><p style='margin:0px;font-size: 16px;line-height: 40px;'><span>"+$(order)[0]['partner_id']+"</span></p></div><div style='width:25%;float:left;'><p style='margin:0px;font-size: 16px;line-height: 40px;'>"+$(order)[0]['date_order']+"</p></div><div style='width:25%;float:left;'><p style='margin:0px;font-size: 16px;line-height: 40px;'>"+self.format_currency($(order)[0]['amount_total'])+"</p></div></div></div></div>")
-                    }
-                    else
-                    {
-                        $('.ac_product_list').append("<div style='width:100%;display:inline-block;'><div style='width:90%;display:block;margin:0px auto;'><div class='order_reference' style='cursor:pointer;'><div style='width:25%;float:left;'><p class='order_pos_reference' style='margin:0px;font-size: 16px;line-height: 40px;'><span class='order_pos_ref'>"+ $(order)[0]['pos_reference'] +"</span></p></div><div style='width:25%;float:left;'><p style='font-size: 16px;line-height: 40px;'><span></span></p></div><div style='width:25%;float:left;'><p style='margin:0px;font-size: 16px;line-height: 40px;'>"+$(order)[0]['date_order']+"</p></div><div style='width:25%;float:left;'><p style='margin:0px;font-size: 16px;line-height: 40px;'>"+self.format_currency($(order)[0]['amount_total'])+"</p></div></div></div></div>")
+                        order_list.push(order)
                     }
                 });
-                var order_pos_ref = $(".order_reference")
-                if($(order_pos_ref).length)
-                    {
-
-                        $(".order_reference").click(function(){
-                        var close_button = $(".close_button")
-                            if($(close_button).length)
-                            {
-                                $(".keyboard_frame").css("display","none")
-                            }
-                            var order_ref = $(this).find(".order_pos_ref").text();
-                            if(order_ref.length)
-                            {
-                                self.gui.show_popup('pos_return_order');
-                                var order_ref_val = $("#return_order_number").val(order_ref)
-                                if($(order_ref_val).length)
-                                {
-                                    var e = $.Event( "keypress", { which: 13 } );
-                                    $('#return_order_number').trigger(e);
-                                }
-                            }
-                        })
-                    }
-                var search_res = $("#search_string").val()
+                if($(search_res))
+                {
+                    self.gui.show_popup('pos_return_order_list',{lines:order_list})
+                    $("#search_string").val(search_res)
+                    self.render_list();
+                    $("#search_string").focus();
+                }
             }).fail(function (error, event) {
                 if (parseInt(error.code, 10) === 200) {
                     // Business Logic Error, not a connection problem
@@ -144,8 +462,8 @@ odoo.define('pos_return.pos_return', function (require) {
             var self = this;
             return this.search_done_orders(self.search_query)
                 .done(function () {
+                    //self.render_list();
                 });
-
         },
         click_cancel: function(){
 	    	this.gui.close_popup();
@@ -155,7 +473,21 @@ odoo.define('pos_return.pos_return', function (require) {
             $('#return_order_number').val('');
             $("span.remaining-qty-tag").css('display', 'none');
 	    },
-
+//        clear_search: function () {
+//            var self = this;
+//            self.$('.searchbox input')[0].value = '';
+//            self.$('.searchbox input').focus();
+//            self.search_query = false;
+//            self.perform_search();
+//        },
+        click_cancel_close: function(){
+	    	this.gui.close_popup();
+            this.pos.get('selectedOrder').set_ret_o_id('');
+            this.pos.get('selectedOrder').destroy();
+            $('#return_order_ref').html('');
+            $('#return_order_number').val('');
+            $("span.remaining-qty-tag").css('display', 'none');
+	    },
     })
 //    Load the Products for return and Scrap Qty based on Order
     var PosReturnOrder = PopupWidget.extend({
@@ -240,6 +572,7 @@ odoo.define('pos_return.pos_return', function (require) {
                                 	} else {
                                 		alert(_t("This order has already been fully returned."));
                                 		self.gui.close_popup();
+                                		$("#search_string").val('')
                                         $("span#return_order").trigger('click')
                                 	}
                                 });
@@ -295,6 +628,7 @@ odoo.define('pos_return.pos_return', function (require) {
 	        $('.ac_product_list').empty();
 	    },
 	    click_confirm: function(){
+	        $("#search_string").val('')
 	    	var self = this;
 	    	var selectedOrder = this.pos.get_order();
 	    	if(selectedOrder.get_ret_o_id()){
@@ -355,6 +689,7 @@ odoo.define('pos_return.pos_return', function (require) {
 	    },
 	    click_cancel: function(){
 	    	this.gui.close_popup();
+	    	$("#search_string").val('')
             this.pos.get('selectedOrder').set_ret_o_id('');
             this.pos.get('selectedOrder').destroy();
             $('#return_order_ref').html('');
@@ -375,137 +710,13 @@ odoo.define('pos_return.pos_return', function (require) {
 
 	    click_prev_popup:function(){
             this.gui.close_popup();
+            $("#search_string").val('')
             $("span#return_order").trigger('click')
 	    },
 
 	});
 	gui.define_popup({name:'pos_return_order', widget: PosReturnOrder});
 	gui.define_popup({name:'pos_return_order_list', widget: PosReturnOrderList});
-
-    screens.ProductScreenWidget.include({
-        init: function() {
-            this._super.apply(this, arguments);
-        },
-
-        start:function(){
-            var self = this;
-            this._super();
-            var selectedOrder = self.pos.get_order();
-            $('#return_order_ref').html('');
-            $("span#return_order").click(function() {
-                selectedOrder = self.pos.get_order();
-                self.search_query = false;
-                self.render_list();
-            })
-
-         },
-//        Rendered the Search Result of Orders
-        render_list: function () {
-            var self = this;
-            var selectedOrder = self.pos.get_order();
-            rpc.query({
-                      model: 'pos.order',
-                      method: 'search_done_orders_for_pos',
-                      args: ['', this.pos.pos_session.id],
-            }).then(function(params) {
-               if(params && params.length > 0){
-                    var lines = [];
-                    _.each(params,function(r) {
-                        lines.push(r);
-                    });
-                    self.lines = lines;
-                    self.gui.show_popup('pos_return_order_list',{lines:lines})
-                    var order_pos_ref = $(".order_reference")
-                    if($(order_pos_ref).length)
-                    {
-                        $(".order_reference").click(function(){
-                            var close_button = $(".close_button")
-                            if($(close_button).length)
-                            {
-                                $(".keyboard_frame").css("display","none")
-                            }
-                            var order_ref = $(this).find(".order_pos_ref").text();
-                            if(order_ref.length)
-                            {
-                                self.gui.show_popup('pos_return_order');
-                                var order_ref_val = $("#return_order_number").val(order_ref)
-                                if($(order_ref_val).length)
-                                {
-                                    var e = $.Event( "keypress", { which: 13 } );
-                                    $('#return_order_number').trigger(e);
-                                }
-                            }
-                        })
-                    }
-               }
-               else {
-                        self.gui.show_popup('pos_return_order');
-               }
-            })
-        },
-   	     // Search Part
-        search_done_orders: function (query) {
-            var self = this;
-            return this._rpc({
-                model: 'pos.order',
-                method: 'search_done_orders_for_pos',
-                args: [query || '', this.pos.pos_session.id],
-            }).then(function (result) {
-                self.orders = result;
-                // Get the date in local time
-                _.each(self.orders, function (order) {
-                    if (order.date_order) {
-                        order.date_order = moment.utc(order.date_order)
-                            .local().format('YYYY-MM-DD HH:mm:ss');
-                    }
-                });
-            }).fail(function (error, event) {
-                if (parseInt(error.code, 10) === 200) {
-                    // Business Logic Error, not a connection problem
-                    self.gui.show_popup(
-                        'error-traceback', {
-                            'title': error.data.message,
-                            'body': error.data.debug,
-                        }
-                    );
-                } else {
-                    self.gui.show_popup('error', {
-                        'title': _t('Connection error'),
-                        'body': _t(
-                            'Can not execute this action because the POS' +
-                            ' is currently offline'),
-                    });
-                }
-                event.preventDefault();
-            });
-        },
-
-        perform_search: function () {
-            var self = this;
-            return this.search_done_orders(self.search_query)
-                .done(function () {
-                    self.render_list();
-                });
-        },
-        click_cancel: function(){
-	    	this.gui.close_popup();
-            this.pos.get('selectedOrder').set_ret_o_id('');
-            this.pos.get('selectedOrder').destroy();
-            $('#return_order_ref').html('');
-            $('#return_order_number').val('');
-            $("span.remaining-qty-tag").css('display', 'none');
-
-	    },
-//        clear_search: function () {
-//            var self = this;
-//            self.$('.searchbox input')[0].value = '';
-//            self.$('.searchbox input').focus();
-//            self.search_query = false;
-//            self.perform_search();
-//        },
-
-    });
-
     screens.ReceiptScreenWidget.include({
         show: function(){
             this._super();
