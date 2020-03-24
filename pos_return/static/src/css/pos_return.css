@@ -6,7 +6,13 @@
     background:      linear-gradient(#7B7979, #393939);
 }
 
-
+.pos #barcode1 .barcode_img{
+    width:330px !important;
+    height:50px;
+}
+.pos #barcode1 object{
+    width: 100% !important;
+}
 
 .label {
     color: #555 !important;
