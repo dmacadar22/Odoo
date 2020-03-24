@@ -190,7 +190,7 @@ odoo.define('star_pos_product_age_restriction.custom_models_js', function(requir
             }
             return _super_posmodel.initialize.call(this, attributes, options);
         },
-        add_product: function(product, options) {
+        /*add_product: function(product, options) {
             var self = this;
             this.eligible_message = _t('You are eligible to purchase this product.');
             this.not_eligible_message = _t('Sorry you are under age.');
@@ -266,7 +266,7 @@ odoo.define('star_pos_product_age_restriction.custom_models_js', function(requir
             } else {
                 return _super_posmodel.add_product.call(self, product, options);
             }
-        },
+        },*/
     });
 
 });
