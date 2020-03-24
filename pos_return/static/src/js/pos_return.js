@@ -87,7 +87,7 @@ odoo.define('pos_return.pos_return', function (require) {
                                 {
                                     $(".keyboard_frame").css("display","none")
                                 }
-                                var order_ref = $(this).find(".order_pos_ref").text();
+                                var order_ref = $(this).parent().parent().parent('.order_main_div').find(".order_pos_ref").text();
                                 if(order_ref.length)
                                 {
                                     self.gui.show_popup('pos_return_order');
@@ -129,7 +129,7 @@ odoo.define('pos_return.pos_return', function (require) {
                         {
                             $(".keyboard_frame").css("display","none")
                         }
-                        var order_ref = $(this).find(".order_pos_ref").text();
+                        var order_ref = $(this).parent().parent().parent('.order_main_div').find(".order_pos_ref").text();
                         if(order_ref.length)
                         {
                             self.gui.show_popup('pos_return_order');
@@ -190,9 +190,6 @@ odoo.define('pos_return.pos_return', function (require) {
             });
         },
         order_action: function (order_data, action) {
-            if (this.old_order !== null) {
-                this.gui.back();
-            }
             var order = this.load_order_from_data(order_data, action);
             if (!order) {
                 // The load of the order failed. (products not found, ...
@@ -204,46 +201,27 @@ odoo.define('pos_return.pos_return', function (require) {
         action_print: function (order_data, order) {
             // We store temporarily the current order so we can safely compute
             // taxes based on fiscal position
-            var self = this
-//            this.pos.current_order = order;
-            var order = order;
-//            this.pos.set_order(order);
+            this.pos.current_order = this.pos.get_order();
+            this.pos.set_order(order);
             this.pos.reloaded_order = order;
             var skip_screen_state = this.pos.config.iface_print_skip_screen;
             // Disable temporarily skip screen if set
-//            this.pos.config.iface_print_skip_screen = false;
-            this.gui.show_screen('receipt');
-            self.render_receipt(order);
+            this.pos.config.iface_print_skip_screen = false;
+	this.gui.show_screen('receipt');
             this.pos.reloaded_order = false;
             // Set skip screen to whatever previous state
             this.pos.config.iface_print_skip_screen = skip_screen_state;
+
             // If it's invoiced, we also print the invoice
             if (order_data.to_invoice) {
                 this.pos.chrome.do_action('point_of_sale.pos_invoice_report', {
                     additional_context: { active_ids: [order_data.id] }
                 })
             }
+
             // Destroy the order so it's removed from localStorage
             // Otherwise it will stay there and reappear on browser refresh
             order.destroy();
-            $(".next").click(function(){
-                order_data.statement_ids = []
-            })
-
-        },
-        render_receipt: function (order) {
-        var order = order;
-        this.$('.pos-receipt-container').html(QWeb.render('PosTicket', {
-            widget: this,
-            pos: this.pos,
-            order: order,
-            returned_order_reference : order.get_ret_o_ref(),
-            returned_order_id : order.get_ret_o_id(),
-            receipt: order.export_for_printing(),
-            orderlines: order.get_orderlines(),
-            paymentlines: order.get_paymentlines(),
-        }));
-        this.pos.from_loaded_order = true;
         },
 
         action_copy: function (order_data, order) {
@@ -733,9 +711,11 @@ odoo.define('pos_return.pos_return', function (require) {
         },
         render_receipt: function () {
             if (!this.pos.get_order().get_ret_o_ref()) {
+
                 return this._super();
             }
             else{
+
                 var order = this.pos.get_order();
                 this.$('.pos-receipt-container').html(QWeb.render('PosTicket', {
                     widget: this,
@@ -785,7 +765,6 @@ odoo.define('pos_return.pos_return', function (require) {
 	    },
     });
 
-    var orderline_id = 1;
     var _super_orderline = models.Orderline.prototype;
     models.Orderline = models.Orderline.extend({
         initialize: function(attr,options){
@@ -874,11 +853,17 @@ odoo.define('pos_return.pos_return', function (require) {
         get_ret_o_ref: function(){
             return this.get('ret_o_ref');
         },
+        init_from_JSON: function (json) {
+            _super_order.init_from_JSON.apply(this, arguments);
+            this.set({
+                ret_o_id:       null,
+                ret_o_ref:      null,
+            });
+        },
 
         export_for_printing: function(){
-            var submitted_order_printing = _super_order.export_for_printing.call(this);
-            var order_no = this.get_name() || false ;
-            var order_no = order_no ? this.get_name().replace(_t('Order '),'') : false;
+            var submitted_order_printing = _super_order.export_for_printing.apply(this, arguments);
+           
             var ret_o_id = this.get_ret_o_id();
             var ret_o_ref = this.get_ret_o_ref();
             var returned_order_reference = '';
@@ -889,8 +874,8 @@ odoo.define('pos_return.pos_return', function (require) {
                 returned_order_id = this.get_ret_o_id();
             }
             var new_val = {
-            		'ret_o_id': this.get_ret_o_id(),
-            		'order_no': order_no,
+            		
+            		
             		returned_order_reference:returned_order_reference,
                     returned_order_id:returned_order_id,
             };

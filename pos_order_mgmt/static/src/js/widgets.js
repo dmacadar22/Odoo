@@ -182,7 +182,9 @@ odoo.define('pos_order_mgmt.widgets', function (require) {
             var skip_screen_state = this.pos.config.iface_print_skip_screen;
             // Disable temporarily skip screen if set
             this.pos.config.iface_print_skip_screen = false;
-            this.gui.show_screen('receipt');
+
+this.gui.show_screen('receipt');
+
             this.pos.reloaded_order = false;
             // Set skip screen to whatever previous state
             this.pos.config.iface_print_skip_screen = skip_screen_state;
@@ -197,6 +199,8 @@ odoo.define('pos_order_mgmt.widgets', function (require) {
             // Destroy the order so it's removed from localStorage
             // Otherwise it will stay there and reappear on browser refresh
             order.destroy();
+
+
         },
 
         action_copy: function (order_data, order) {
