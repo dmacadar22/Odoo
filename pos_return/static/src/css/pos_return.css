@@ -85,7 +85,7 @@
 	width: 60% !important;
 }
 .ac_product_list{
-	max-height: 310px !important;
+	max-height: 90% !important;
 	overflow-y: auto;
 }
 .product_content{
