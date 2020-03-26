@@ -98,10 +98,10 @@
                                 <div style="width:15%;float:left;">
 									<t t-if="line.order_status">
                                         <t t-if="line.order_status == 'freturn'">
-                                            <p style="margin:0px;font-size: 16px;line-height: 25px;">Fully Returned</p>
+                                            <p style="margin:0px;margin-top:11px;margin-bottom:10px;font-size: 16px;line-height: 25px;">Fully Returned</p>
                                         </t>
                                         <t t-if="line.order_status == 'preturn'">
-                                            <p style="margin:0px;font-size: 16px;line-height: 25px;">Partially Returned</p>
+                                            <p style="margin:0px;margin-top:11px;margin-bottom:10px;font-size: 16px;line-height: 25px;">Partially Returned</p>
                                         </t>
 									</t>
                                     <p style="font-size: 16px;line-height: 25px;"></p>

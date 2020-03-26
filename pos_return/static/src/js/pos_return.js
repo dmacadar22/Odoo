@@ -207,7 +207,7 @@ odoo.define('pos_return.pos_return', function (require) {
             var skip_screen_state = this.pos.config.iface_print_skip_screen;
             // Disable temporarily skip screen if set
             this.pos.config.iface_print_skip_screen = false;
-	this.gui.show_screen('receipt');
+            this.gui.show_screen('receipt');
             this.pos.reloaded_order = false;
             // Set skip screen to whatever previous state
             this.pos.config.iface_print_skip_screen = skip_screen_state;
@@ -361,6 +361,7 @@ odoo.define('pos_return.pos_return', function (require) {
         click_cancel: function(){
 	    	this.gui.close_popup();
 	    	$("#search_string").val('')
+	    	console.log("++++++++cancel",order)
             this.pos.get('selectedOrder').set_ret_o_id('');
             this.pos.get('selectedOrder').destroy();
             $('#return_order_ref').html('');
@@ -445,6 +446,7 @@ odoo.define('pos_return.pos_return', function (require) {
         },
         click_cancel: function(){
 	    	this.gui.close_popup();
+	    	console.log("++++++++cancel",order)
             this.pos.get('selectedOrder').set_ret_o_id('');
             this.pos.get('selectedOrder').destroy();
             $('#return_order_ref').html('');
