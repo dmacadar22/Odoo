@@ -19,7 +19,10 @@
     border: solid 1px rgb(209, 209, 209);
     transition: all 150ms linear;
 }
-
+.bg_footer
+{
+	background-color:#F0EEEE;
+}
 .orderlist-screen .order-line .button:active {
     background: black;
     border-color: black;
