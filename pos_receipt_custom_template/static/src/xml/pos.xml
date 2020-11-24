@@ -24,6 +24,7 @@
     </t>
 
     <t t-extend="PosTicket">
+        <t t-jquery=".receipt-phone" t-operation="replace"/>
         <t t-jquery=".receipt-orderlines tr[t-foreach='orderlines']" t-operation="append">
             <t t-set="second_product_name" t-value="orderline.get_product().second_product_name"/>
             <t t-if="widget.pos.config.show_second_product_name_in_receipt and second_product_name">
