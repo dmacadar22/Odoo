@@ -77,6 +77,7 @@
     </t>
 
     <t t-extend="PosTicket">
+        <t t-jquery=".receipt-phone" t-operation="replace"/>
         <t t-jquery="t[t-esc='order.name']" t-operation="after">
             <t t-if="order.returned_order_id">
                 <br/>
