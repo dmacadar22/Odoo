@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form -->
+        <record id="cap_purchase_picking_users_auth" model="ir.ui.view">
+            <field name="name">cap.purchase.picking.users.auth.inherit</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+				<xpath expr="//field[@name='in_group_51']" position="after">
+				    <field name="authorized_picking_type_ids" string="Authorized Picking Types" domain="[[&quot;code&quot;,&quot;=&quot;,&quot;incoming&quot;]]"/>
+				</xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
