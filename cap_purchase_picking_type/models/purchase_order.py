@@ -22,7 +22,7 @@ class PurchaseOrder(models.Model):
                 types = type_obj.search([('code', '=', 'incoming'), ('warehouse_id', '=', False)])
             return types[:1]
         elif len(self.authorized_picking_type_ids) == 1:
-            return self.authorized_picking_type_ids[0]
+            return self.authorized_picking_type_ids[0].id
         else:
             return False
 
