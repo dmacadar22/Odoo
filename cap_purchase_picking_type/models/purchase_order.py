@@ -14,15 +14,15 @@ class PurchaseOrder(models.Model):
 
     @api.model
     def _default_picking_type(self):
-        if len(self.authorized_picking_type_ids) == 0:
+        if len(self.env.user.authorized_picking_type_ids) == 0:
             type_obj = self.env['stock.picking.type']
             company_id = self.env.context.get('company_id') or self.env.user.company_id.id
             types = type_obj.search([('code', '=', 'incoming'), ('warehouse_id.company_id', '=', company_id)])
             if not types:
                 types = type_obj.search([('code', '=', 'incoming'), ('warehouse_id', '=', False)])
             return types[:1]
-        elif len(self.authorized_picking_type_ids) == 1:
-            return self.authorized_picking_type_ids[0].id
+        elif len(self.env.user.authorized_picking_type_ids) == 1:
+            return self.env.user.authorized_picking_type_ids[0].id
         else:
             return False
 
