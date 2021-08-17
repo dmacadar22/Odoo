@@ -7,9 +7,9 @@ from odoo import api, fields, models, _
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
 
-    authorized_picking_type_ids = fields.Many2many(string= Authorized Picking Types, 
+    authorized_picking_type_ids = fields.Many2many(string='Authorized Picking Types', 
                                                     'stock.picking.type', related='user_id.authorized_picking_type_ids')
-    
+
     @api.model
     def _default_picking_type(self):
         if len(self.authorized_picking_type_ids) == 0:
