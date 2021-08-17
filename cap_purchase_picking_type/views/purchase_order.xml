@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form -->
+        <record id="cap_purchase_order_picking_form" model="ir.ui.view">
+            <field name="name">cap.purchase.order.picking.form.inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="sequence">98</field>
+            <field name="inherit_id" ref="purchase_stock.purchase_order_view_form_inherit"/>
+            <field name="arch" type="xml">
+              <xpath expr="//field[@name='picking_type_id']" position="attributes">
+                <attribute name="domain">["&amp;",["code","=","incoming"],["id","in",authorized_picking_type_ids]]</attribute>
+              </xpath>
+              <xpath expr="//field[@name='picking_type_id']" position="after">
+                <field name="authorized_picking_type_ids" string="Authorized Picking Types" invisible="1"/>
+              </xpath>              
+            </field>
+        </record>
+    </data>
+</odoo>
