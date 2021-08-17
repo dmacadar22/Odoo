@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, fields, models, _
+from odoo.addons.purchase.models.purchase import PurchaseOrder as Purchase
 
 
 class PurchaseOrder(models.Model):
