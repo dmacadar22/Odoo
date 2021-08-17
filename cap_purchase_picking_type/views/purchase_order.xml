@@ -12,7 +12,7 @@
                 <attribute name="domain">["&amp;",["code","=","incoming"],["id","in",authorized_picking_type_ids]]</attribute>
               </xpath>
               <xpath expr="//field[@name='picking_type_id']" position="after">
-                <field name="authorized_picking_type_ids" string="Authorized Picking Types"/>
+                <field name="authorized_picking_type_ids" string="Authorized Picking Types" invisible="1"/>
               </xpath>              
             </field>
         </record>

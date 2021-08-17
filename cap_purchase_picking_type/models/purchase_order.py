@@ -13,7 +13,7 @@ class PurchaseOrder(models.Model):
                                                     related='user_id.authorized_picking_type_ids')
 
     @api.model
-    def _default_picking_type(self):
+    def _new_default_picking_type(self):
         if len(self.env.user.authorized_picking_type_ids) == 0:
             type_obj = self.env['stock.picking.type']
             company_id = self.env.context.get('company_id') or self.env.user.company_id.id
@@ -29,5 +29,5 @@ class PurchaseOrder(models.Model):
 
     picking_type_id = fields.Many2one('stock.picking.type', 'Deliver To', 
                                     states=Purchase.READONLY_STATES, required=True, 
-                                    default=_default_picking_type,
+                                    default=_new_default_picking_type,
                                     help="This will determine operation type of incoming shipment")
